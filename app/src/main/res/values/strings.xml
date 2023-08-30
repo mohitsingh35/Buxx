@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TradeZY</string>
+    <string name="web_client_id">263771462943-g6pp9i1vtitikgj45vfsgqpcefjfcoel.apps.googleusercontent.com</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+</resources>
