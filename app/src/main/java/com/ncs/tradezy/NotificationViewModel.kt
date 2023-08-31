@@ -19,6 +19,18 @@ class NotificationViewModel @Inject constructor(
         NotificationState()
     )
     val res: State<NotificationState> = _res
+    private val _updateRes:MutableState<NotificationContent> = mutableStateOf(
+        NotificationContent(item = NotificationContent.NotificationItem(),
+            )
+    )
+    val updateRes:State<NotificationContent> = _updateRes
+
+
+    fun setData(data: NotificationContent){
+        _updateRes.value=data
+    }
+    fun update(item: NotificationContent)=repo.updateNotification(item)
+
 
     init {
         viewModelScope.launch {

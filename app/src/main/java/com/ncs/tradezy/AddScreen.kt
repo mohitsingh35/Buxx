@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
@@ -55,7 +56,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(viewModel: AddScreenViewModel = hiltViewModel(), appContext: Context){
+fun AddScreen(viewModel: AddScreenViewModel = hiltViewModel(), appContext: Context,navController: NavController){
     val context = LocalContext.current
     var imageUris by remember { mutableStateOf(emptyList<Uri>()) }
     var title by remember { mutableStateOf("") }
@@ -79,7 +80,7 @@ fun AddScreen(viewModel: AddScreenViewModel = hiltViewModel(), appContext: Conte
     }
     if (userList.contains(googleAuthUiClient.getSignedInUser()?.userID)){
         Column(modifier = Modifier.background(primary)) {
-            setActionBar(screenName = "Post an Ad", R.drawable.ic_launcher_foreground)
+            setActionBar(screenName = "Post an Ad", R.drawable.ic_launcher_foreground,navController)
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -233,7 +234,7 @@ fun AddScreen(viewModel: AddScreenViewModel = hiltViewModel(), appContext: Conte
         Column(modifier = Modifier
             .background(primary)
             .fillMaxSize()) {
-            setActionBar(screenName = "Post an Ad", R.drawable.ic_launcher_foreground)
+            setActionBar(screenName = "Post an Ad", R.drawable.ic_launcher_foreground,navController)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                 Text(text = "Please complete your profile to post an Ad", color = accent)
             }

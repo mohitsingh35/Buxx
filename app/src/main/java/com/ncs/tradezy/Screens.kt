@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.primary
@@ -28,7 +29,8 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel= hiltViewModel(),
     viewModel2: ProfileActivityViewModel= hiltViewModel(),
     token:String,
-    filteredList: ArrayList<RealTimeUserResponse>
+    filteredList: ArrayList<RealTimeUserResponse>,
+    navController: NavController
 ){
 
     Log.d("fcm token test", token.toString())
@@ -61,7 +63,7 @@ fun HomeScreen(
                 continue
             }
         }
-        setActionBar(screenName = "Home", image = R.drawable.ic_launcher_foreground)
+        setActionBar(screenName = "Home", image = R.drawable.ic_launcher_foreground,navController)
         Box (Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)) {
             LazyColumn {
                 items(1){
@@ -73,9 +75,9 @@ fun HomeScreen(
 }
 
 @Composable
-fun SearchScreen(){
+fun SearchScreen(navController: NavController){
     Column(modifier = Modifier.background(primary)){
-        setActionBar(screenName = "Search", image = R.drawable.ic_launcher_foreground)
+        setActionBar(screenName = "Search", image = R.drawable.ic_launcher_foreground, navController = navController)
     }
 }
 @Composable

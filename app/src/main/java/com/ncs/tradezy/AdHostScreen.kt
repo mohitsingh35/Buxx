@@ -19,12 +19,15 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,7 +52,7 @@ import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel()){
+fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel()){
     val res=viewModel.res.value
     var seller:RealTimeUserResponse.RealTimeUsers?=null
     var buyer:RealTimeUserResponse.RealTimeUsers?=null
@@ -63,15 +66,42 @@ fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMode
             buyer=res.item[i].item
         }
     }
-
+    val context= LocalContext.current
     var sendExchangeNotification by remember {
         mutableStateOf(false)
     }
+    val scope= rememberCoroutineScope()
     val  title="New Exchange Request"
     val message="Exchange Request from ${buyer?.name}. Tap here to know more."
     if (sendExchangeNotification){
         sendExchangeNotification=false
         sendNotification(PushNotification(NotificationData(title,message),seller?.fcmToken!!))
+        //send message as well to firebase with notification
+        LaunchedEffect(key1 = true){
+            scope.launch(Dispatchers.Main) {
+                viewModel2.insertNotification(
+                    NotificationContent.NotificationItem
+                        (title = title,message=message,time = System.currentTimeMillis(),
+                        receiverID = seller.userId,senderID = buyer?.userId, read = "false")).collect {
+                    when (it) {
+                        is ResultState.Success -> {
+                            context.showMsg(
+                                msg = it.data
+                            )
+                        }
+
+                        is ResultState.Failure -> {
+                            context.showMsg(
+                                msg = it.msg.toString()
+                            )
+                        }
+
+                        ResultState.Loading -> {
+                        }
+                    }
+                }
+            }
+        }
     }
     Box(modifier = Modifier
         .fillMaxSize()
@@ -119,6 +149,8 @@ fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMode
     }
 
 }
+
+
 
 private fun sendNotification(notification: PushNotification) = CoroutineScope(Dispatchers.IO).launch {
     try {

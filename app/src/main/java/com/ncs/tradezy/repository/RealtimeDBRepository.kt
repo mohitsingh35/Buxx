@@ -127,6 +127,24 @@ class RealtimeDBRepository @Inject constructor(
         }
     }
 
+    override fun updateNotification(res: NotificationContent): Flow<ResultState<String>> = callbackFlow {
+        trySend(ResultState.Loading)
+        val map=HashMap<String,Any>()
+        map["read"]=res.item?.read!!
+
+        db.child("notifications").child(res.key!!).updateChildren(
+            map
+        ).addOnCompleteListener{
+            trySend(ResultState.Success("Updated Successfully"))
+        }
+            .addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+        awaitClose {
+            close()
+        }
+    }
+
     override fun insertuser(item: RealTimeUserResponse.RealTimeUsers): Flow<ResultState<String>> =
         callbackFlow {
             trySend(ResultState.Loading)

@@ -28,6 +28,9 @@ interface RealtimeRepository {
 
     fun getNotification():Flow<ResultState<List<NotificationContent>>>
 
+    fun updateNotification(
+        res: NotificationContent
+    ):Flow<ResultState<String>>
 
 
 

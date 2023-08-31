@@ -1,6 +1,8 @@
 package com.ncs.tradezy
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -8,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ncs.tradezy.repository.RealTimeUserResponse
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation(
     navController: NavHostController,
@@ -16,13 +19,16 @@ fun Navigation(
     val context= LocalContext.current
     NavHost(navController = navController, startDestination = "Home" ){
         composable("Home"){
-            HomeScreen(token = token, filteredList = filterList)
+            HomeScreen(token = token, filteredList = filterList, navController = navController)
         }
         composable("Add"){
-            AddScreen(appContext = context)
+            AddScreen(appContext = context, navController = navController)
         }
         composable("Search"){
-            SearchScreen()
+            SearchScreen(navController = navController)
+        }
+        composable("notificationScreen"){
+            notificationsScreen(navController = navController)
         }
 
     }
