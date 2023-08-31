@@ -10,7 +10,8 @@ data class AdContent(
         val desc:String,
         val price:Int,
         val time:Long,
-        val isExchangeable:Boolean,
-        val buyerLocation:String
+        val isExchangeable:String,
+        val buyerLocation:String,
+        val sellerId:String
     )
 }

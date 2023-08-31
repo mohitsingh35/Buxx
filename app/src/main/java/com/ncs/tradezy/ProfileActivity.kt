@@ -2,6 +2,7 @@ package com.ncs.tradezy
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -44,6 +45,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.googleAuth.GoogleAuthActivity
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
@@ -64,6 +67,14 @@ class ProfileActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        var token =""
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM token profile", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+            token = task.result
+        })
         super.onCreate(savedInstanceState)
         setContent {
             val viewModel: ProfileActivityViewModel = hiltViewModel()
@@ -79,7 +90,7 @@ class ProfileActivity : ComponentActivity() {
                 isUserinDB=true
             }
 
-            ShowUserProfile(isUserinDB)
+            ShowUserProfile(isUserinDB, token = token)
 
         }
     }
@@ -92,7 +103,7 @@ class ProfileActivity : ComponentActivity() {
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hiltViewModel()){
+    fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hiltViewModel(),token:String){
         val scope= rememberCoroutineScope()
         val userData= googleAuthUiClient.getSignedInUser()
         val res=viewModel.res.value
@@ -110,7 +121,7 @@ class ProfileActivity : ComponentActivity() {
             }
         }
         if (isUpdate.value){
-            updateUser(isUpdate = isUpdate, itemState = filteredList?.get(0)!! , viewModel = viewModel)
+            updateUser(isUpdate = isUpdate, itemState = filteredList?.get(0)!! , viewModel = viewModel, fcmToken = token  )
         }
         if (createNewUserinDb.value){
             CreateNewUserinDb(isUpdate = createNewUserinDb, viewModel = viewModel)
@@ -202,7 +213,7 @@ class ProfileActivity : ComponentActivity() {
         isUpdate: MutableState<Boolean>,
         itemState: RealTimeUserResponse,
         viewModel: ProfileActivityViewModel,
-
+        fcmToken:String,
         ){
         val username= remember {
             mutableStateOf(itemState.item?.name)
@@ -221,7 +232,7 @@ class ProfileActivity : ComponentActivity() {
             AlertDialog(onDismissRequest = { isUpdate.value=false }, confirmButton = {
                 Button(onClick = { scope.launch(Dispatchers.Main) {
                     viewModel.update(
-                        RealTimeUserResponse(item = RealTimeUserResponse.RealTimeUsers(name=username.value, email = email.value, phNumber = phNum.value),key = itemState.key)
+                        RealTimeUserResponse(item = RealTimeUserResponse.RealTimeUsers(name=username.value, email = email.value, phNumber = phNum.value, fcmToken = fcmToken),key = itemState.key)
                     ).collect{
                         when(it){
                             is ResultState.Success->{

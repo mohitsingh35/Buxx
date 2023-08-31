@@ -11,7 +11,8 @@ data class RealTimeUserResponse(
         val name:String?="",
         val phNumber: String?="",
         val profileDPurl:String?="",
-        val email:String?=""
+        val email:String?="",
+        val fcmToken:String?=""
     )
 
 }

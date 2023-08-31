@@ -12,6 +12,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
+import com.ncs.tradezy.EachAdResponse
+import com.ncs.tradezy.HomeScreenState
+import com.ncs.tradezy.NotificationContent
 
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +26,7 @@ class RealtimeDBRepository @Inject constructor(
 ): RealtimeRepository {
     private var storageReference=Firebase.storage
 
-    val currentUserID=FirebaseAuth.getInstance().currentUser?.uid
+    private val currentUserID=FirebaseAuth.getInstance().currentUser?.uid
     override fun insertAd(item: AdContent.AdContentItem, images: List<Uri>): Flow<ResultState<String>> =
         callbackFlow {
             trySend(ResultState.Loading)
@@ -54,19 +57,19 @@ class RealtimeDBRepository @Inject constructor(
 
 
 
-    override fun getAd(): Flow<ResultState<List<AdContent>>> = callbackFlow{
+    override fun getAd(): Flow<ResultState<List<EachAdResponse>>> = callbackFlow{
         trySend(ResultState.Loading)
 
         val valueEvent=object :ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val items=snapshot.children.map {
-                    AdContent(
-                        it.getValue(AdContent.AdContentItem::class.java),
+                    EachAdResponse(
+                        it.getValue(EachAdResponse.EachItem::class.java),
                         key = it.key
                     )
                 }
                 trySend(ResultState.Success(items))
-                Log.d("pari",items.toString())
+                Log.d("test",items.toString())
             }
 
 
@@ -81,6 +84,49 @@ class RealtimeDBRepository @Inject constructor(
             close()
         }
     }
+
+    override fun insertNotification(item: NotificationContent.NotificationItem): Flow<ResultState<String>> =
+        callbackFlow {
+            trySend(ResultState.Loading)
+            db.child("notifications").push().setValue(
+                item
+            ).addOnCompleteListener {
+                if(it.isSuccessful)
+                    trySend(ResultState.Success("Successfully"))
+            }.addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+            awaitClose {
+                close()
+            }
+        }
+
+    override fun getNotification(): Flow<ResultState<List<NotificationContent>>> = callbackFlow{
+        trySend(ResultState.Loading)
+
+        val valueEvent=object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val items=snapshot.children.map {
+                    NotificationContent(
+                        it.getValue(NotificationContent.NotificationItem::class.java),
+                        key = it.key
+                    )
+                }
+                trySend(ResultState.Success(items))
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                trySend(ResultState.Failure(error.toException()))
+            }
+
+        }
+        db.child("notifications").addValueEventListener(valueEvent)
+        awaitClose{
+            db.child("notifications").removeEventListener(valueEvent)
+            close()
+        }
+    }
+
     override fun insertuser(item: RealTimeUserResponse.RealTimeUsers): Flow<ResultState<String>> =
         callbackFlow {
             trySend(ResultState.Loading)
@@ -102,6 +148,7 @@ class RealtimeDBRepository @Inject constructor(
         map["name"]=res.item?.name!!
         map["email"]=res.item.email!!
         map["phNumber"]=res.item.phNumber!!
+        map["fcmToken"]=res.item.fcmToken!!
 
 
         db.child("users").child(res.key!!).updateChildren(

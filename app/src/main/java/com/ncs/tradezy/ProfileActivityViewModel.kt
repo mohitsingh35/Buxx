@@ -49,6 +49,7 @@ class ProfileActivityViewModel @Inject constructor
                             isLoading = true
                         )
                     }
+
                 }
             }
         }

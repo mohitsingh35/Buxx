@@ -2,6 +2,7 @@ package com.ncs.tradezy
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +79,14 @@ fun detailsEnterScreen(context: Context, viewmodel: AuthActivityViewModel = hilt
             oneTapClient = Identity.getSignInClient(context)
         )
     }
+    var token =""
+    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+        if (!task.isSuccessful) {
+            Log.w("FCM token", "Fetching FCM registration token failed", task.exception)
+            return@OnCompleteListener
+        }
+        token = task.result
+    })
     val scope= rememberCoroutineScope()
     val userData= googleAuthUiClient.getSignedInUser()
     var username by remember {
@@ -130,7 +141,7 @@ fun detailsEnterScreen(context: Context, viewmodel: AuthActivityViewModel = hilt
             Button(onClick = { scope.launch(Dispatchers.Main) {
                 viewmodel.insertUser(
                     RealTimeUserResponse.RealTimeUsers
-                        (userId = userData?.userID,name = username,phNumber = phNum,profileDPurl = userData?.profilePictureUrl,email = email)).collect {
+                        (userId = userData?.userID,name = username,phNumber = phNum,profileDPurl = userData?.profilePictureUrl,email = email, fcmToken = token)).collect {
                     when (it) {
                         is ResultState.Success -> {
                             context.showMsg(

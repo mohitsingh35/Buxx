@@ -46,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.auth.FirebaseAuth
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import com.ncs.tradezy.ui.theme.accent
 import com.ncs.tradezy.ui.theme.primary
@@ -189,8 +190,9 @@ fun AddScreen(viewModel: AddScreenViewModel = hiltViewModel(), appContext: Conte
                                                 desc = desc,
                                                 price = price.toInt(),
                                                 time = System.currentTimeMillis(),
-                                                isExchangeable = isExchangeable,
-                                                buyerLocation = buyerLocation
+                                                isExchangeable = isExchangeable.toString(),
+                                                buyerLocation = buyerLocation,
+                                                sellerId = FirebaseAuth.getInstance().currentUser?.uid!!
                                             ),
                                             images = imageUris,
                                         ).collect {

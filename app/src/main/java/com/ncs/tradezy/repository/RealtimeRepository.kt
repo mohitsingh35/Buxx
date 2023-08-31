@@ -3,6 +3,8 @@ package com.ncs.tradezy.repository
 import android.net.Uri
 import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
+import com.ncs.tradezy.EachAdResponse
+import com.ncs.tradezy.NotificationContent
 import kotlinx.coroutines.flow.Flow
 
 
@@ -19,7 +21,14 @@ interface RealtimeRepository {
         item: AdContent.AdContentItem, images:List<Uri>
     ): Flow<ResultState<String>>
 
-    fun getAd():Flow<ResultState<List<AdContent>>>
+    fun getAd():Flow<ResultState<List<EachAdResponse>>>
+    fun insertNotification(
+        item: NotificationContent.NotificationItem
+    ): Flow<ResultState<String>>
+
+    fun getNotification():Flow<ResultState<List<NotificationContent>>>
+
+
 
 
 
