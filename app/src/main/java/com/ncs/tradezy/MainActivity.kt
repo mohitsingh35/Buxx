@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
@@ -44,6 +46,7 @@ class MainActivity : ComponentActivity() {
     private var backPressedToast: Toast? = null
 
     val user=FirebaseAuth.getInstance().currentUser?.uid
+    @OptIn(ExperimentalPagerApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -85,6 +88,7 @@ class MainActivity : ComponentActivity() {
                     Column(modifier = Modifier
                         .fillMaxHeight()
                         .padding(bottom = 18.dp)) {
+
                         Box(modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(0.93f)){

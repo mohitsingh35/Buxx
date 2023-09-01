@@ -2,6 +2,8 @@ package com.ncs.tradezy
 
 import android.content.ContentValues.TAG
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -47,12 +49,27 @@ import com.ncs.tradezy.ui.theme.betterWhite
 import com.ncs.tradezy.ui.theme.primary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel()){
+fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel(),
+           viewModel3:AddScreenViewModel= hiltViewModel()){
+    var viewcount by remember {
+        mutableStateOf(item.item?.viewCount?.toInt())
+    }
+    LaunchedEffect(key1 = true ){
+        viewcount = viewcount!! + 1
+    }
+    var trendingViewCount by remember {
+        mutableStateOf(item.item?.trendingViewCount?.toInt())
+    }
+    LaunchedEffect(key1 = true) {
+        delay(10000)
+        trendingViewCount = trendingViewCount!! + 1
+    }
     val res=viewModel.res.value
     var seller:RealTimeUserResponse.RealTimeUsers?=null
     var buyer:RealTimeUserResponse.RealTimeUsers?=null
@@ -103,10 +120,58 @@ fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMode
             }
         }
     }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(primary)
         .padding(16.dp)){
+        LaunchedEffect(key1 = true ){
+            delay(500L)
+            scope.launch(Dispatchers.Main) {
+                viewModel3.update(
+                    AdContent(item = AdContent.AdContentItem(viewCount = viewcount.toString(), trendingViewCount = trendingViewCount.toString()),key = item.key)
+                ).collect{
+                    when(it){
+                        is ResultState.Success->{
+                            context.showMsg(
+                                msg=""
+                            )
+                        }
+                        is ResultState.Failure->{
+                            context.showMsg(
+                                msg=it.msg.toString()
+                            )
+                        }
+                        ResultState.Loading->{
+                        }
+                    }
+                }
+            }
+        }
+        LaunchedEffect(key1 = true ){
+            delay(10500L)
+            scope.launch(Dispatchers.Main) {
+                viewModel3.update(
+                    AdContent(item = AdContent.AdContentItem(viewCount = viewcount.toString(), trendingViewCount = trendingViewCount.toString()),key = item.key)
+                ).collect{
+                    when(it){
+                        is ResultState.Success->{
+                            context.showMsg(
+                                msg=""
+                            )
+                        }
+                        is ResultState.Failure->{
+                            context.showMsg(
+                                msg=it.msg.toString()
+                            )
+                        }
+                        ResultState.Loading->{
+                        }
+                    }
+                }
+            }
+        }
+
         LazyColumn {
             items(1){
                 LazyRow(

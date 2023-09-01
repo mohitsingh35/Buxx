@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 import com.google.firebase.auth.FirebaseAuth
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.primary
@@ -24,6 +26,7 @@ import kotlinx.coroutines.launch
 
 private val currentUser=FirebaseAuth.getInstance().currentUser?.uid
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeScreenViewModel= hiltViewModel(),
@@ -45,7 +48,7 @@ fun HomeScreen(
         val res=viewModel.res.value
         val context= LocalContext.current
         val scope= rememberCoroutineScope()
-
+        val pagerState = rememberPagerState(pageCount = 3)
         val items= listOf(
             ItemContent(listOf( R.drawable.amg),"Mercedes AMG","Mercedes",9000,1692814763079,true,""),
             ItemContent(listOf( R.drawable.amg),"Lamborghini","Lamborghini",9000,1692814788107,true,""),
@@ -64,13 +67,9 @@ fun HomeScreen(
             }
         }
         setActionBar(screenName = "Home", image = R.drawable.ic_launcher_foreground,navController)
-        Box (Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)) {
-            LazyColumn {
-                items(1){
-                    itemHolder(items = filter)
-                }
-            }
-        }
+        Tabs(pagerState = pagerState)
+        TabsContent(pagerState = pagerState,token,filteredList,navController)
+
     }
 }
 

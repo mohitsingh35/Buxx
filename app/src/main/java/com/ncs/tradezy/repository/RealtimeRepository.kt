@@ -22,6 +22,10 @@ interface RealtimeRepository {
     ): Flow<ResultState<String>>
 
     fun getAd():Flow<ResultState<List<EachAdResponse>>>
+
+    fun updateAd(
+        res: AdContent
+    ):Flow<ResultState<String>>
     fun insertNotification(
         item: NotificationContent.NotificationItem
     ): Flow<ResultState<String>>

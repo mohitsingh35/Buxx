@@ -105,13 +105,6 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
                 }
 
             }
-
-        }
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(3.dp)
-                .background(secondary)) {
         }
     }
 }

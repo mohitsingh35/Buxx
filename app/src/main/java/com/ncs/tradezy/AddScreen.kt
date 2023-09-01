@@ -193,7 +193,9 @@ fun AddScreen(viewModel: AddScreenViewModel = hiltViewModel(), appContext: Conte
                                                 time = System.currentTimeMillis(),
                                                 isExchangeable = isExchangeable.toString(),
                                                 buyerLocation = buyerLocation,
-                                                sellerId = FirebaseAuth.getInstance().currentUser?.uid!!
+                                                sellerId = FirebaseAuth.getInstance().currentUser?.uid!!,
+                                                viewCount = "0",
+                                                trendingViewCount = "0"
                                             ),
                                             images = imageUris,
                                         ).collect {

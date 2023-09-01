@@ -7,6 +7,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.repository.RealtimeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -20,6 +21,19 @@ class AddScreenViewModel @Inject constructor
         UserState()
     )
     val res: State<UserState> = _res
+
+    private val _updateRes:MutableState<AdContent> = mutableStateOf(
+        AdContent(item = AdContent.AdContentItem(),
+        )
+    )
+    val updateRes:State<AdContent> = _updateRes
+
+
+    fun setData(data: AdContent){
+        _updateRes.value=data
+    }
+
+    fun update(item: AdContent)=repo.updateAd(item)
 
     fun insertAd(items:AdContent.AdContentItem,images:List<Uri>)=repo.insertAd(items,images)
 

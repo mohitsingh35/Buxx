@@ -85,6 +85,26 @@ class RealtimeDBRepository @Inject constructor(
         }
     }
 
+    override fun updateAd(res: AdContent): Flow<ResultState<String>>  = callbackFlow {
+        trySend(ResultState.Loading)
+        val map=HashMap<String,Any>()
+        map["viewCount"]=res.item?.viewCount!!
+        map["trendingViewCount"]= res.item.trendingViewCount!!
+
+
+        db.child("Ads").child(res.key!!).updateChildren(
+            map
+        ).addOnCompleteListener{
+            trySend(ResultState.Success("Updated Successfully"))
+        }
+            .addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+        awaitClose {
+            close()
+        }
+    }
+
     override fun insertNotification(item: NotificationContent.NotificationItem): Flow<ResultState<String>> =
         callbackFlow {
             trySend(ResultState.Loading)

@@ -17,7 +17,9 @@ data class EachAdResponse(
         val time:Long?=null,
         val exchangeable:String?="",
         val buyerLocation:String?="",
-        val sellerId:String?=""
+        val sellerId:String?="",
+        val viewCount:String?="",
+        val trendingViewCount:String?=""
     ):Serializable
 
 }
