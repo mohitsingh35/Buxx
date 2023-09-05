@@ -4,6 +4,7 @@ import android.net.Uri
 import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
 import com.ncs.tradezy.EachAdResponse
+import com.ncs.tradezy.MessageResponse
 import com.ncs.tradezy.NotificationContent
 import kotlinx.coroutines.flow.Flow
 
@@ -44,6 +45,11 @@ interface RealtimeRepository {
         res: NotificationContent
     ):Flow<ResultState<String>>
 
+    fun insertMessage(
+        item: MessageResponse.MessageItems
+    ): Flow<ResultState<String>>
+
+    fun getMessage():Flow<ResultState<List<MessageResponse>>>
 
 
 

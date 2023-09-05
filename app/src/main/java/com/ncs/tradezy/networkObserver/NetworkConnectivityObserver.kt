@@ -37,6 +37,7 @@ class NetworkConnectivityObserver(private val context: Context):ConnectivityObse
                     launch { send(ConnectivityObserver.Status.Unavailable ) }
 
                 }
+
             }
             connectivityManager.registerDefaultNetworkCallback(callback)
             awaitClose {

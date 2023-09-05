@@ -14,6 +14,7 @@ import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
 import com.ncs.tradezy.EachAdResponse
 import com.ncs.tradezy.HomeScreenState
+import com.ncs.tradezy.MessageResponse
 import com.ncs.tradezy.NotificationContent
 
 import kotlinx.coroutines.channels.awaitClose
@@ -258,6 +259,52 @@ class RealtimeDBRepository @Inject constructor(
         db.child("users").addValueEventListener(valueEvent)
         awaitClose{
             db.child("users").removeEventListener(valueEvent)
+            close()
+        }
+    }
+    override fun insertMessage(item: MessageResponse.MessageItems): Flow<ResultState<String>> =
+        callbackFlow {
+            trySend(ResultState.Loading)
+            db.child("messages").push().setValue(
+                item
+            ).addOnCompleteListener {
+                if(it.isSuccessful)
+                    trySend(ResultState.Success("Successfully"))
+            }.addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+            awaitClose {
+                close()
+            }
+        }
+
+    override fun getMessage(): Flow<ResultState<List<MessageResponse>>> = callbackFlow{
+        trySend(ResultState.Loading)
+
+        val valueEvent=object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                val items=snapshot.children.map {
+                    MessageResponse(
+                        it.getValue(MessageResponse.MessageItems::class.java),
+                        key = it.key
+                    )
+                }
+                val chatList= ArrayList<MessageResponse>()
+                chatList.clear()
+                for (i in 0 until items.size){
+                    chatList.add(items[i])
+                }
+                trySend(ResultState.Success(chatList))
+
+            }
+            override fun onCancelled(error: DatabaseError) {
+                trySend(ResultState.Failure(error.toException()))
+            }
+        }
+        db.child("messages").addValueEventListener(valueEvent)
+        awaitClose{
+            db.child("messages").removeEventListener(valueEvent)
             close()
         }
     }

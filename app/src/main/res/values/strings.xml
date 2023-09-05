@@ -3,4 +3,6 @@
     <string name="web_client_id">263771462943-g6pp9i1vtitikgj45vfsgqpcefjfcoel.apps.googleusercontent.com</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_ad_host">AdHostActivity</string>
+    <string name="title_activity_chat">ChatActivity</string>
+    <string name="title_activity_chat_host">ChatHostActivity</string>
 </resources>

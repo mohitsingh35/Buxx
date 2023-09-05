@@ -59,11 +59,15 @@ import java.util.concurrent.TimeUnit
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel(),
-           viewModel3:AddScreenViewModel= hiltViewModel(),viewModel4:HomeScreenViewModel= hiltViewModel()){
+           viewModel3:AddScreenViewModel= hiltViewModel(),viewModel4:HomeScreenViewModel= hiltViewModel(),
+           viewModel5:ChatViewModel= hiltViewModel()){
     val scope= rememberCoroutineScope()
     val context= LocalContext.current
 
     var markassold by remember {
+        mutableStateOf(false)
+    }
+    var buy by remember {
         mutableStateOf(false)
     }
 
@@ -148,12 +152,37 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
         sendExchangeNotification=false
         sendNotification(PushNotification(NotificationData(title,message),seller?.fcmToken!!))
         //send message as well to firebase with notification
+
         LaunchedEffect(key1 = true){
             scope.launch(Dispatchers.Main) {
                 viewModel2.insertNotification(
                     NotificationContent.NotificationItem
                         (title = title,message=message,time = System.currentTimeMillis(),
                         receiverID = seller.userId,senderID = buyer?.userId, read = "false")).collect {
+                    when (it) {
+                        is ResultState.Success -> {
+                            context.showMsg(
+                                msg = it.data
+                            )
+                        }
+
+                        is ResultState.Failure -> {
+                            context.showMsg(
+                                msg = it.msg.toString()
+                            )
+                        }
+
+                        ResultState.Loading -> {
+                        }
+                    }
+                }
+            }
+        }
+        LaunchedEffect(key1 = true){
+            scope.launch(Dispatchers.Main) {
+                viewModel5.insertMessage(
+                    MessageResponse.MessageItems(senderId = FirebaseAuth.getInstance().currentUser?.uid,
+                        receiverId = item.item?.sellerId,message=message,category = "Exchange",read = "false", ad = item, time = System.currentTimeMillis())).collect {
                     when (it) {
                         is ResultState.Success -> {
                             context.showMsg(
@@ -252,7 +281,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         Modifier
                             .fillMaxWidth()
                             .padding(50.dp), horizontalArrangement = Arrangement.SpaceBetween){
-                        Button(onClick = { /*TODO*/ }) {
+                        Button(onClick = {  }) {
                             Text(text = "Buy")
                         }
 

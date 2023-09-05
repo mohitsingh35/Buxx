@@ -8,15 +8,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -84,13 +87,26 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
                 Row {
                     Box(Modifier.fillMaxHeight(),contentAlignment = Alignment.Center){
                         Row {
-                            Text(text = noticount.toString(),Modifier.clip(CircleShape).size(25.dp).background(
-                                Color.Red), fontSize = 20.sp, color = betterWhite, textAlign = TextAlign.Center)
+                            Text(text = noticount.toString(),
+                                Modifier
+                                    .clip(CircleShape)
+                                    .size(25.dp)
+                                    .background(
+                                        Color.Red
+                                    ), fontSize = 20.sp, color = betterWhite, textAlign = TextAlign.Center)
                             Icon(imageVector = Icons.Filled.Notifications, contentDescription = "", tint = betterWhite, modifier = Modifier
                                 .clickable {
                                     navController.navigate("notificationScreen")
                                 }
                                 .size(25.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Icon(imageVector = Icons.Filled.Email, contentDescription = "", tint = betterWhite, modifier = Modifier
+                                .clickable {
+                                    context.startActivity(Intent(context, ChatActivity::class.java))
+
+                                }
+                                .size(25.dp))
+
                         }
                         
                     }
