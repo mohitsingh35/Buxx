@@ -34,6 +34,7 @@ class AddScreenViewModel @Inject constructor
     }
 
     fun update(item: AdContent)=repo.updateAd(item)
+    fun updateADstatus(item: AdContent)=repo.updateADstatus(item)
 
     fun insertAd(items:AdContent.AdContentItem,images:List<Uri>)=repo.insertAd(items,images)
 

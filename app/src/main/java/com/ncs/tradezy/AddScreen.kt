@@ -195,7 +195,8 @@ fun AddScreen(viewModel: AddScreenViewModel = hiltViewModel(), appContext: Conte
                                                 buyerLocation = buyerLocation,
                                                 sellerId = FirebaseAuth.getInstance().currentUser?.uid!!,
                                                 viewCount = "0",
-                                                trendingViewCount = "0"
+                                                trendingViewCount = "0",
+                                                sold = "false"
                                             ),
                                             images = imageUris,
                                         ).collect {

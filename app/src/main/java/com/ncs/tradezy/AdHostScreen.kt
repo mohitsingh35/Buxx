@@ -1,6 +1,8 @@
 package com.ncs.tradezy
 
 import android.content.ContentValues.TAG
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -32,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.AndroidViewModel
 import androidx.work.BackoffPolicy
@@ -55,20 +58,53 @@ import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel(),
-           viewModel3:AddScreenViewModel= hiltViewModel()){
-    var viewcount by remember {
-        mutableStateOf(item.item?.viewCount?.toInt())
+fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel(),
+           viewModel3:AddScreenViewModel= hiltViewModel(),viewModel4:HomeScreenViewModel= hiltViewModel()){
+    val scope= rememberCoroutineScope()
+    val context= LocalContext.current
+
+    var markassold by remember {
+        mutableStateOf(false)
     }
-    LaunchedEffect(key1 = true ){
-        viewcount = viewcount!! + 1
+
+
+    val res4=viewModel4.res.value
+    var item:EachAdResponse=item1
+    for (i in 0 until res4.item.size){
+        if (res4.item[i].key==item1.key){
+            item=res4.item[i]
+        }
     }
-    var trendingViewCount by remember {
-        mutableStateOf(item.item?.trendingViewCount?.toInt())
+    val sameuser by remember {
+        mutableStateOf(item.item?.sellerId==FirebaseAuth.getInstance().currentUser?.uid)
     }
-    LaunchedEffect(key1 = true) {
-        delay(10000)
-        trendingViewCount = trendingViewCount!! + 1
+
+    val issold=item.item?.sold
+    Log.d("isSold value",item.toString())
+    if (markassold){
+        markassold=false
+        LaunchedEffect(key1 = true ){
+            scope.launch(Dispatchers.Main) {
+                viewModel3.updateADstatus(
+                    AdContent(item = AdContent.AdContentItem(sold = "true"),key = item.key)
+                ).collect{
+                    when(it){
+                        is ResultState.Success->{
+                            context.showMsg(
+                                msg="Marked As Sold"
+                            )
+                        }
+                        is ResultState.Failure->{
+                            context.showMsg(
+                                msg=it.msg.toString()
+                            )
+                        }
+                        ResultState.Loading->{
+                        }
+                    }
+                }
+            }
+        }
     }
     val res=viewModel.res.value
     var seller:RealTimeUserResponse.RealTimeUsers?=null
@@ -83,11 +119,29 @@ fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMode
             buyer=res.item[i].item
         }
     }
-    val context= LocalContext.current
+
+    var viewcount by remember {
+        mutableStateOf(item.item?.viewCount?.toInt())
+    }
+    if (!sameuser){
+        LaunchedEffect(key1 = true ){
+            viewcount = viewcount!! + 1
+        }
+    }
+    var trendingViewCount by remember {
+        mutableStateOf(item.item?.trendingViewCount?.toInt())
+    }
+    if (!sameuser){
+        LaunchedEffect(key1 = true) {
+            delay(10000)
+            trendingViewCount = trendingViewCount!! + 1
+        }
+    }
+
+
     var sendExchangeNotification by remember {
         mutableStateOf(false)
     }
-    val scope= rememberCoroutineScope()
     val  title="New Exchange Request"
     val message="Exchange Request from ${buyer?.name}. Tap here to know more."
     if (sendExchangeNotification){
@@ -120,6 +174,7 @@ fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMode
             }
         }
     }
+
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -180,7 +235,7 @@ fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMode
                         .height(350.dp)
                 ) {
                     items(item.item?.images?.size!!) { index ->
-                        AsyncImage(model = item.item.images[index], contentDescription =  " ",modifier = Modifier
+                        AsyncImage(model = item.item!!.images?.get(index), contentDescription =  " ",modifier = Modifier
                             .fillMaxWidth()
                             .height(350.dp)
                             .padding(end = 5.dp), contentScale = ContentScale.Crop)
@@ -191,27 +246,78 @@ fun adHost(item:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMode
                 Text(text = item.item?.desc!!, color = betterWhite, fontSize = 18.sp)
                 AsyncImage(model = seller?.profileDPurl, contentDescription = "", modifier = Modifier.size(40.dp))
                 Text(text = "Posted by ${seller?.name}", color = betterWhite)
-                Text(text = "Posted on ${convertLongToTimeString(item.item.time!!)}", color = betterWhite)
-                Row (
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(50.dp), horizontalArrangement = Arrangement.SpaceBetween){
-                    Button(onClick = { /*TODO*/ }) {
-                        Text(text = "Buy")
-                    }
+                Text(text = "Posted on ${convertLongToTimeString(item.item!!.time!!)}", color = betterWhite)
+                if (!sameuser){
+                    Row (
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(50.dp), horizontalArrangement = Arrangement.SpaceBetween){
+                        Button(onClick = { /*TODO*/ }) {
+                            Text(text = "Buy")
+                        }
 
-                    if (item.item.exchangeable =="true"){
-                        Button(onClick = {
-                            sendExchangeNotification=true
-                        }) {
-                            Text(text = "Exchange")
+                        if (item.item!!.exchangeable =="true"){
+                            Button(onClick = {
+                                sendExchangeNotification=true
+                            }) {
+                                Text(text = "Exchange")
+                            }
                         }
                     }
                 }
-            }
+                if (sameuser && issold=="false"){
+                    Row (
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(50.dp), horizontalArrangement = Arrangement.SpaceBetween){
+                        Button(onClick = {
+                            markassold=true
+                        }) {
+                            Text(text = "Mark as Sold")
+                        }
 
+                            Button(onClick = {
+                                scope.launch(Dispatchers.Main) {
+
+                                        viewModel4.delete(item.key!!).collect {
+                                            when (it) {
+                                                is ResultState.Success -> {
+                                                    context.showMsg(
+                                                        msg = it.data
+                                                    )
+                                                    val intent = Intent(context, MainActivity::class.java)
+                                                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                                    context.startActivity(intent)                                                }
+                                                is ResultState.Failure -> {
+                                                    context.showMsg(
+                                                        msg = it.msg.toString()
+                                                    )
+                                                }
+
+                                                ResultState.Loading -> {
+                                                }
+                                            }
+                                        }
+                                    }
+
+                            }) {
+                                Text(text = "Delete")
+                            }
+
+                    }
+                }
+                if(issold=="true" && sameuser){
+                    Row {
+                        Text(text = "Sold!", color = betterWhite, fontSize = 30.sp)
+                    }
+                }
+
+
+            }
         }
+
     }
+
 
 }
 

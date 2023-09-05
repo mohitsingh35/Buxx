@@ -10,6 +10,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,6 +33,8 @@ import com.ncs.tradezy.MainActivity
 import com.ncs.tradezy.ProfileScreen
 import com.ncs.tradezy.detailsEnterScreen
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
+import com.ncs.tradezy.networkObserver.ConnectivityObserver
+import com.ncs.tradezy.networkObserver.NetworkConnectivityObserver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -43,32 +47,34 @@ class GoogleAuthActivity : ComponentActivity() {
             oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
+    private lateinit var connectivityObserver: ConnectivityObserver
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        connectivityObserver=NetworkConnectivityObserver(applicationContext)
         super.onCreate(savedInstanceState)
         setContent {
+            val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
             var scope= rememberCoroutineScope()
             val viewModel2: AuthViewModel = hiltViewModel()
             val res=viewModel2.res.value
             var uid = ""
-
-            Box(
+            if (status==ConnectivityObserver.Status.Available){
+                Box(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                val context= LocalContext.current
+                    val context= LocalContext.current
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "splash") {
                         composable("sign_in") {
                             val viewModel = viewModel<GoogleSignInViewModel>()
                             val state by viewModel.state.collectAsState()
 
-                                for (i in 0 until  res.item.size){
-                                    if (res.item[i].item?.userId==googleAuthUiClient.getSignedInUser()?.userID){
-                                        uid = res.item[i].item?.userId!!
-                                    }
+                            for (i in 0 until  res.item.size){
+                                if (res.item[i].item?.userId==googleAuthUiClient.getSignedInUser()?.userID){
+                                    uid = res.item[i].item?.userId!!
                                 }
+                            }
 
                             LaunchedEffect(key1 = Unit) {
                                 if(googleAuthUiClient.getSignedInUser() != null) {
@@ -220,6 +226,13 @@ class GoogleAuthActivity : ComponentActivity() {
                         }
                     }
                 }
+            }
+            else{
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    Text(text = "Internet Error")
+                }
+            }
+            
             }
         }
 

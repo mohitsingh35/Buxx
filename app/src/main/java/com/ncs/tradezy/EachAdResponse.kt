@@ -19,7 +19,8 @@ data class EachAdResponse(
         val buyerLocation:String?="",
         val sellerId:String?="",
         val viewCount:String?="",
-        val trendingViewCount:String?=""
-    ):Serializable
+        val trendingViewCount:String?="",
+        val sold:String?="",
+        ):Serializable
 
 }

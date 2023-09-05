@@ -88,8 +88,9 @@ class RealtimeDBRepository @Inject constructor(
     override fun updateAd(res: AdContent): Flow<ResultState<String>>  = callbackFlow {
         trySend(ResultState.Loading)
         val map=HashMap<String,Any>()
-        map["viewCount"]=res.item?.viewCount!!
-        map["trendingViewCount"]= res.item.trendingViewCount!!
+        map["trendingViewCount"]= res.item?.trendingViewCount!!
+        map["viewCount"]= res.item.viewCount!!
+
 
 
         db.child("Ads").child(res.key!!).updateChildren(
@@ -97,6 +98,37 @@ class RealtimeDBRepository @Inject constructor(
         ).addOnCompleteListener{
             trySend(ResultState.Success("Updated Successfully"))
         }
+            .addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+        awaitClose {
+            close()
+        }
+    }
+
+    override fun updateADstatus(res: AdContent): Flow<ResultState<String>> = callbackFlow {
+        trySend(ResultState.Loading)
+        val map=HashMap<String,Any>()
+        map["sold"]=res.item?.sold!!
+        db.child("Ads").child(res.key!!).updateChildren(
+            map
+        ).addOnCompleteListener{
+            trySend(ResultState.Success("Updated Successfully"))
+        }
+            .addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+        awaitClose {
+            close()
+        }
+    }
+
+    override fun deleteAd(key: String): Flow<ResultState<String>> = callbackFlow{
+        trySend(ResultState.Loading)
+        db.child("Ads").child(key).removeValue()
+            .addOnCompleteListener{
+                trySend(ResultState.Success("Ad Deleted"))
+            }
             .addOnFailureListener {
                 trySend(ResultState.Failure(it))
             }

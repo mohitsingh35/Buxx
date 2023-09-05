@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -18,6 +20,8 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.google.firebase.auth.FirebaseAuth
+import com.ncs.tradezy.networkObserver.ConnectivityObserver
+import com.ncs.tradezy.networkObserver.NetworkConnectivityObserver
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.primary
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val currentUser=FirebaseAuth.getInstance().currentUser?.uid
+private lateinit var connectivityObserver: ConnectivityObserver
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -35,6 +40,8 @@ fun HomeScreen(
     filteredList: ArrayList<RealTimeUserResponse>,
     navController: NavController
 ){
+    connectivityObserver= NetworkConnectivityObserver(LocalContext.current.applicationContext)
+    val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
 
     Log.d("fcm token test", token.toString())
     if (token!="" && (filteredList.isNotEmpty())){
@@ -70,15 +77,11 @@ fun HomeScreen(
         Tabs(pagerState = pagerState)
         TabsContent(pagerState = pagerState,token,filteredList,navController)
 
+
     }
 }
 
-@Composable
-fun SearchScreen(navController: NavController){
-    Column(modifier = Modifier.background(primary)){
-        setActionBar(screenName = "Search", image = R.drawable.ic_launcher_foreground, navController = navController)
-    }
-}
+
 @Composable
 fun updatefcmToken(newToken:String?, viewModel: ProfileActivityViewModel, itemState: RealTimeUserResponse){
 

@@ -1,10 +1,12 @@
 package com.ncs.tradezy
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +21,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -46,6 +50,7 @@ import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.googleAuth.GoogleAuthActivity
@@ -66,6 +71,7 @@ class ProfileActivity : ComponentActivity() {
         )
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         var token =""
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -101,6 +107,7 @@ class ProfileActivity : ComponentActivity() {
         startActivity(intent)
         finish()
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hiltViewModel(),token:String){
@@ -137,10 +144,16 @@ class ProfileActivity : ComponentActivity() {
             var phNum by remember {
                 mutableStateOf(udata?.phNumber)
             }
-            Column {
-                ProfileScreenContent(profileUrl = userData?.profilePictureUrl, username = username, email = email, phNum = phNum ){
-                    isUpdate.value=true
+            LazyColumn(
+                Modifier
+                    .fillMaxWidth()
+                    .background(primary),horizontalAlignment = Alignment.CenterHorizontally) {
+                items(1){
+                    ProfileScreenContent(profileUrl = userData?.profilePictureUrl, username = username, email = email, phNum = phNum ){
+                        isUpdate.value=true
+                    }
                 }
+
             }
         }
         else{
@@ -162,26 +175,44 @@ class ProfileActivity : ComponentActivity() {
 
         }
     }
+    @RequiresApi(Build.VERSION_CODES.O)
     @Composable
-    fun ProfileScreenContent(profileUrl:String?,username:String?,email:String?,phNum:String?,onClick:()->Unit,){
+    fun ProfileScreenContent(profileUrl:String?,username:String?,email:String?,phNum:String?,viewModel: HomeScreenViewModel= hiltViewModel(),onClick:()->Unit,){
+        val res=viewModel.res.value
+        val userads=ArrayList<EachAdResponse>()
+        for (i in 0 until res.item.size){
+            if (res.item[i].item?.sellerId==FirebaseAuth.getInstance().currentUser?.uid){
+                userads.add(res.item[i])
+            }
+        }
+        val activeAds=ArrayList<EachAdResponse>()
+        for (i in 0 until userads.size){
+            if (userads[i].item?.sold=="false"){
+                activeAds.add(userads[i])
+            }
+        }
+        val soldAds=ArrayList<EachAdResponse>()
+        for (i in 0 until userads.size){
+            if (userads[i].item?.sold=="true"){
+                soldAds.add(userads[i])
+            }
+        }
 
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(primary), contentAlignment = Alignment.Center){
             Column(modifier = Modifier
-                .fillMaxHeight()
-                .padding(18.dp)) {
+                .fillMaxSize()
+                .background(primary)
+                .padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 AsyncImage(model = profileUrl, contentDescription ="", modifier = Modifier
                     .size(80.dp)
                     .clip(
                         CircleShape
                     ) )
                 Spacer(modifier = Modifier.height(35.dp))
-                Text(text = username!! )
+                Text(text = username!!, color = betterWhite )
                 Spacer(modifier = Modifier.height(15.dp))
-                Text(text = email!! )
+                Text(text = email!! ,color = betterWhite)
                 Spacer(modifier = Modifier.height(15.dp))
-                Text(text = phNum!! )
+                Text(text = phNum!!,color = betterWhite )
                 Spacer(modifier = Modifier.height(15.dp))
                 Box(modifier = Modifier
                     .height(30.dp)
@@ -203,9 +234,45 @@ class ProfileActivity : ComponentActivity() {
                 Button(onClick = { onClick() }) {
                     Text(text = "Update")
                 }
+                Column {
+                    Spacer(modifier = Modifier.height(50.dp))
+                    Text(text = "All Ads", color = betterWhite)
+                    Spacer(modifier = Modifier.height(20.dp))
+                    LazyRow(){
+                        items(1){
+
+                            for (i in 0 until userads.size){
+                                eachAd(item = userads[i])
+                            }
+
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(text = "Active Ads", color = betterWhite)
+                    Spacer(modifier = Modifier.height(20.dp))
+                    LazyRow(){
+                        items(1){
+                            for (i in 0 until activeAds.size){
+                                eachAd(item = activeAds[i])
+                            }
+
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(text = "Sold Ads", color = betterWhite)
+                    Spacer(modifier = Modifier.height(20.dp))
+                    LazyRow(){
+                        items(1){
+                            for (i in 0 until soldAds.size){
+                                eachAd(item = soldAds[i])
+                            }
+
+                        }
+                    }
+                }
 
             }
-        }
+
     }
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable

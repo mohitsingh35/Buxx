@@ -25,9 +25,7 @@ class HomeScreenViewModel @Inject constructor
         HomeScreenState()
     )
     val res: State<HomeScreenState> = _res
-
-
-
+    fun delete(key:String)=repo.deleteAd(key)
 
     init {
         viewModelScope.launch {

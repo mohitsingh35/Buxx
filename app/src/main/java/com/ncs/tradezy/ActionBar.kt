@@ -106,5 +106,6 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
 
             }
         }
+
     }
 }

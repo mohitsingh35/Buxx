@@ -24,8 +24,7 @@ class AdHostActivity : ComponentActivity() {
         setContent {
             HostelTheme {
                 val clickedItem = intent.getSerializableExtra("clickedItem") as? EachAdResponse
-                adHost(item = clickedItem!!)
-
+                adHost(item1 = clickedItem!!)
             }
         }
     }
