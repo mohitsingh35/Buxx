@@ -1,6 +1,11 @@
 package com.ncs.tradezy
 
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
@@ -21,35 +26,45 @@ import kotlinx.coroutines.launch
 
 @ExperimentalPagerApi
 @Composable
-fun Tabs(pagerState: PagerState) {
+fun Tabs(pagerState: PagerState,navController: NavController) {
 
     val list = listOf(
         "All Items","Buy Only","Exchange")
     val scope = rememberCoroutineScope()
-    TabRow(
-        selectedTabIndex = pagerState.currentPage,
-        backgroundColor = primary,
-        contentColor = Color.White,
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
-                height = 2.dp,
-                color = Color.White
-            )
-        }
-    ) {
-        list.forEachIndexed { index, _ ->
-            Tab(
-                text = {
-                    Text(list[index],color = if (pagerState.currentPage == index) Color.White else Color.LightGray)
-                },
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
+    Column {
+
+
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+            backgroundColor = primary,
+            contentColor = Color.White,
+            indicator = { tabPositions ->
+                TabRowDefaults.Indicator(
+                    Modifier.pagerTabIndicatorOffset(pagerState, tabPositions),
+                    height = 2.dp,
+                    color = Color.White
+                )
+            }
+        ) {
+            list.forEachIndexed { index, _ ->
+                Tab(
+                    text = {
+                        Text(
+                            list[index],
+                            color = if (pagerState.currentPage == index) Color.White else Color.LightGray
+                        )
+                    },
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
                     }
-                }
-            )
+                )
+            }
+        }
+        Box(modifier = Modifier.padding(start = 10.dp, end = 10.dp,top=10.dp)){
+            searchbar(navController = navController)
         }
     }
 }

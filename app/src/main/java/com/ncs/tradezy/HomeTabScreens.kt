@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
@@ -56,9 +58,12 @@ fun AllItems(
             }
 
             Box (Modifier.padding(start = 10.dp, top = 10.dp, end = 10.dp)) {
-                LazyColumn {
-                    items(1){
-                        itemHolder(items = filter)
+                Column {
+
+                    LazyColumn {
+                        items(1) {
+                            itemHolder(items = filter)
+                        }
                     }
                 }
             }

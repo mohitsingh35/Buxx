@@ -356,7 +356,7 @@ private fun sendNotification(notification: PushNotification) = CoroutineScope(Di
     try {
         val response = RetrofitInstance.api.postNotification(notification)
         if(response.isSuccessful) {
-            Log.d(TAG, "Response: ${Gson().toJson(response)}")
+            Log.d(TAG, "Response")
         } else {
             Log.e(TAG, response.errorBody().toString())
         }

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.repository.RealtimeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -19,7 +20,16 @@ class ChatViewModel @Inject constructor(
         MessageState()
     )
     val res: State<MessageState> = _res
+    private val _updateRes:MutableState<MessageResponse> = mutableStateOf(
+        MessageResponse(item = MessageResponse.MessageItems(),
+        )
+    )
+    val updateRes:State<MessageResponse> = _updateRes
 
+
+    fun setData(data: MessageResponse){
+        _updateRes.value=data
+    }
 
 
     init {
@@ -46,6 +56,7 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    fun update(item: MessageResponse)=repo.updateMessage(item)
     fun insertMessage(item: MessageResponse.MessageItems)=repo.insertMessage(item)
 
 }

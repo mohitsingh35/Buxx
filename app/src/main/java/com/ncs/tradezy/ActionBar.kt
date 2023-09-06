@@ -1,6 +1,7 @@
 package com.ncs.tradezy
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,85 +44,161 @@ import com.ncs.tradezy.ui.theme.primary
 import com.ncs.tradezy.ui.theme.secondary
 
 
-//23-08-2023 8:00 P.M.
+
 
 @Composable
-fun setActionBar(screenName:String, image: Int,navController: NavController,viewModel: NotificationViewModel= hiltViewModel()){
-    val res=viewModel.res.value
-    var noticount=0
-    val currentuser= FirebaseAuth.getInstance().currentUser?.uid
-    var filtereNotiList=ArrayList<NotificationContent>()
-    for (i in 0 until res.item.size){
-        if (res.item[i].item?.receiverID==currentuser){
+fun setActionBar(screenName:String, image: Int,navController: NavController,viewModel: NotificationViewModel= hiltViewModel(),viewModel2: ChatViewModel= hiltViewModel()) {
+    val res = viewModel.res.value
+    var noticount = 0
+    var messagecount=0
+    val currentuser = FirebaseAuth.getInstance().currentUser?.uid
+    var filtereNotiList = ArrayList<NotificationContent>()
+    for (i in 0 until res.item.size) {
+        if (res.item[i].item?.receiverID == currentuser) {
             filtereNotiList.add(res.item[i])
         }
     }
-    for (i in 0 until filtereNotiList.size){
-        if (filtereNotiList[i].item?.read=="false"){
+    for (i in 0 until filtereNotiList.size) {
+        if (filtereNotiList[i].item?.read == "false") {
             noticount++
         }
     }
-    val context= LocalContext.current
-    Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(65.dp)
-                .background(primary)
+    val context = LocalContext.current
+    val res2=viewModel2.res.value
+    if (res2.item.isNotEmpty()) {
 
-        ) {
 
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(Modifier.padding(15.dp)){
-                    Text(
-                        text = screenName,
-                        color = accent,
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+        val userMessages = mutableListOf<MessageResponse>()
+        val latestMessagesMap = HashMap<String, MessageResponse>()
 
-                }
-                Row {
-                    Box(Modifier.fillMaxHeight(),contentAlignment = Alignment.Center){
-                        Row {
-                            Text(text = noticount.toString(),
-                                Modifier
-                                    .clip(CircleShape)
-                                    .size(25.dp)
-                                    .background(
-                                        Color.Red
-                                    ), fontSize = 20.sp, color = betterWhite, textAlign = TextAlign.Center)
-                            Icon(imageVector = Icons.Filled.Notifications, contentDescription = "", tint = betterWhite, modifier = Modifier
-                                .clickable {
-                                    navController.navigate("notificationScreen")
-                                }
-                                .size(25.dp))
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Icon(imageVector = Icons.Filled.Email, contentDescription = "", tint = betterWhite, modifier = Modifier
-                                .clickable {
-                                    context.startActivity(Intent(context, ChatActivity::class.java))
+        for (i in 0 until res2.item.size) {
+            val message = res2.item[i]
+            val senderId = message.item?.senderId
+            val receiverId = message.item?.receiverId
+            val otherUserId = if (senderId == currentuser) receiverId else senderId
 
-                                }
-                                .size(25.dp))
+            if (senderId == currentuser || receiverId == currentuser) {
+                val existingLatestMessage = latestMessagesMap[otherUserId]
 
-                        }
-                        
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(25.dp))
-                    ) {
-                        Image(painterResource(id = image), contentDescription = "",Modifier.clickable {
-                            context.startActivity(Intent(context, ProfileActivity::class.java))
-                        })
+                if (existingLatestMessage == null) {
+                    latestMessagesMap[otherUserId!!] = message
+                } else {
+                    val existingTime = existingLatestMessage.item?.time
+                    val currentTime = message.item?.time
+
+                    if (currentTime != null && (existingTime == null || currentTime > existingTime)) {
+                        latestMessagesMap[otherUserId!!] = message
                     }
                 }
-
             }
         }
-
+        userMessages.addAll(latestMessagesMap.values)
+        Log.d("msgUser",userMessages.toString())
+        for (i in 0 until userMessages.size) {
+            if (userMessages[i].item?.receiverId == currentuser && userMessages[i].item?.read=="false") {
+                messagecount++
+            }
+        }
     }
-}
+
+
+
+    Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(65.dp)
+                    .background(primary)
+
+            ) {
+
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box(Modifier.padding(15.dp)) {
+                        Text(
+                            text = screenName,
+                            color = accent,
+                            fontSize = 25.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+
+                    }
+                    Row {
+                        Box(Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
+                            Row {
+                                Text(
+                                    text = noticount.toString(),
+                                    Modifier
+                                        .clip(CircleShape)
+                                        .size(25.dp)
+                                        .background(
+                                            Color.Red
+                                        ),
+                                    fontSize = 20.sp,
+                                    color = betterWhite,
+                                    textAlign = TextAlign.Center
+                                )
+                                Icon(imageVector = Icons.Filled.Notifications,
+                                    contentDescription = "",
+                                    tint = betterWhite,
+                                    modifier = Modifier
+                                        .clickable {
+                                            navController.navigate("notificationScreen")
+                                        }
+                                        .size(25.dp))
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = messagecount.toString(),
+                                    Modifier
+                                        .clip(CircleShape)
+                                        .size(25.dp)
+                                        .background(
+                                            Color.Red
+                                        ),
+                                    fontSize = 20.sp,
+                                    color = betterWhite,
+                                    textAlign = TextAlign.Center
+                                )
+                                Icon(imageVector = Icons.Filled.Email,
+                                    contentDescription = "",
+                                    tint = betterWhite,
+                                    modifier = Modifier
+                                        .clickable {
+                                            context.startActivity(
+                                                Intent(
+                                                    context,
+                                                    ChatActivity::class.java
+                                                )
+                                            )
+
+                                        }
+                                        .size(25.dp))
+
+                            }
+
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(25.dp))
+                        ) {
+                            Image(
+                                painterResource(id = image),
+                                contentDescription = "",
+                                Modifier.clickable {
+                                    context.startActivity(
+                                        Intent(
+                                            context,
+                                            ProfileActivity::class.java
+                                        )
+                                    )
+                                })
+                        }
+                    }
+
+                }
+            }
+
+        }
+    }

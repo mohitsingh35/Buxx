@@ -309,4 +309,22 @@ class RealtimeDBRepository @Inject constructor(
         }
     }
 
+    override fun updateMessage(res: MessageResponse): Flow<ResultState<String>>  = callbackFlow {
+        trySend(ResultState.Loading)
+        val map=HashMap<String,Any>()
+        map["read"]=res.item?.read!!
+
+        db.child("messages").child(res.key!!).updateChildren(
+            map
+        ).addOnCompleteListener{
+            trySend(ResultState.Success("Updated Successfully"))
+        }
+            .addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+        awaitClose {
+            close()
+        }
+    }
+
 }

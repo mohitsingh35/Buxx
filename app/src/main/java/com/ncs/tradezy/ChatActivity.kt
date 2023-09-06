@@ -106,10 +106,10 @@ fun showList(viewModel: ChatViewModel= hiltViewModel()){
                     for (i in 0 until userMessages.size){
 
                             if (userMessages[i].item?.senderId==currentUser){
-                                eachRow(message = userMessages[i].item?.message!!, isRead =true, otherId = userMessages[i].item?.receiverId!!)
+                                eachRow(message = userMessages[i].item?.message!!, isRead =true, otherId = userMessages[i].item?.receiverId!!,)
                             }
                             else{
-                                eachRow(message = userMessages[i].item?.message!!, isRead = userMessages[i].item?.read.toBoolean(), otherId = userMessages[i].item?.senderId!!)
+                                eachRow(message = userMessages[i].item?.message!!, isRead = userMessages[i].item?.read.toBoolean(), otherId = userMessages[i].item?.senderId!!,)
                             }
                         }
                     }
@@ -120,7 +120,7 @@ fun showList(viewModel: ChatViewModel= hiltViewModel()){
 
 }
 @Composable
-fun eachRow(message:String,isRead:Boolean,viewModel2: ProfileActivityViewModel= hiltViewModel(),otherId:String){
+fun eachRow(message:String,isRead:Boolean,viewModel2: ProfileActivityViewModel= hiltViewModel(),otherId:String,){
     var sender=ArrayList<RealTimeUserResponse>()
     val res=viewModel2.res.value
     val context= LocalContext.current
@@ -137,6 +137,7 @@ fun eachRow(message:String,isRead:Boolean,viewModel2: ProfileActivityViewModel= 
                     val intent = Intent(context, ChatHostActivity::class.java)
                     intent.putExtra("name", sender[0].item?.name)
                     intent.putExtra("id",sender[0].item?.userId )
+                    intent.putExtra("token",sender[0].item?.fcmToken )
                     context.startActivity(intent)
                 }
                 .background(Color.LightGray)

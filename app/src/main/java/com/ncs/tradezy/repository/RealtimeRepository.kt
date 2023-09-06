@@ -51,7 +51,9 @@ interface RealtimeRepository {
 
     fun getMessage():Flow<ResultState<List<MessageResponse>>>
 
-
+    fun updateMessage(
+        res: MessageResponse
+    ):Flow<ResultState<String>>
 
 
 
