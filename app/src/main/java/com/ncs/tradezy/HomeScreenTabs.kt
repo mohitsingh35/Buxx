@@ -64,7 +64,6 @@ fun Tabs(pagerState: PagerState,navController: NavController) {
             }
         }
         Box(modifier = Modifier.padding(start = 10.dp, end = 10.dp,top=10.dp)){
-            searchbar(navController = navController)
         }
     }
 }

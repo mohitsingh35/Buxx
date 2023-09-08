@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,7 +26,7 @@ fun Navigation(
             AddScreen(appContext = context, navController = navController)
         }
         composable("Search"){
-            SearchScreen(navController = navController)
+            SearchScreen(navController1 = navController)
         }
         composable("notificationScreen"){
             notificationsScreen(navController = navController)
@@ -42,6 +43,21 @@ fun NavigationChatHost(
     NavHost(navController = navController, startDestination = "chatHost" ){
         composable("chatHost"){
             chatHost(name =  name!! , id = id!!, fcmtoken = fcmtoken!!, dp = dp!! )
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun NavigationSearchScreen(
+    navController: NavHostController, filterbyTrending: List<EachAdResponse>, filterbyViews:List<EachAdResponse>){
+    val context= LocalContext.current
+    NavHost(navController = navController, startDestination = "discover" ){
+        composable("discover"){
+            discoverarea(filterbyTrending = filterbyTrending, filterbyViews = filterbyViews,navController)
+        }
+        composable("search"){
+            searcharea(navController)
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -236,6 +238,10 @@ fun chatHost(name:String,id:String,fcmtoken:String,dp:String) {
                 Text(text = name, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
             }
         }
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(Color.LightGray))
         var padding=0.9f
         var lineCount by remember {
             mutableIntStateOf(1)
@@ -296,112 +302,135 @@ fun chatHost(name:String,id:String,fcmtoken:String,dp:String) {
             }
         }
 
-        Box(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
-                .background(background), contentAlignment = Alignment.Center
+                .background(background),
+            elevation = 50.dp
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(start = 10.dp), contentAlignment = Alignment.Center){
-                    Icon(imageVector = Icons.Filled.Face, contentDescription = "", tint = main, modifier = Modifier
-                        .size(30.dp)
-                        .clickable {
-                            launcher.launch("image/*")
-                        })
-                }
-                Box(modifier = Modifier
-                    .background(background)
-                    .fillMaxHeight(), contentAlignment = Alignment.Center){
-                    BasicTextField(
-                        value = message.value,
-                        onValueChange = { newText ->
-                            message.value = newText
-                            val maxLineLength = 25
-                            lineCount = (newText.length + maxLineLength - 1)/maxLineLength
-                            Log.d("linecount",lineCount.toString())
-                        },
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(0.5.dp)
+                        .background(Color.LightGray)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(background)
+                        .fillMaxHeight(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .padding(top = 25.dp, start = 20.dp)
-                            .fillMaxHeight(), cursorBrush = SolidColor(Color.Black)
-                    ){
-                        if (message.value==""){
-                            Text(text = "write a message", color = Color.LightGray)
-                        }
-                        else{
-                            Text(text = message.value, color = Color.Black)
-
-                        }
+                            .fillMaxHeight()
+                            .padding(start = 10.dp), contentAlignment = Alignment.Center
+                    ) {
+                        Icon(imageVector = Icons.Filled.Face,
+                            contentDescription = "",
+                            tint = main,
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clickable {
+                                    launcher.launch("image/*")
+                                })
                     }
-                }
-                Box(Modifier.padding(end = 15.dp)) {
-                    Box(modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(main)
-                        .clickable {
-
-                            scope.launch(Dispatchers.Main) {
-
-                                if (message.value.isNotEmpty()) {
-                                    sendNotification(
-                                        PushNotification(
-                                            NotificationData(
-                                                currentUserData[0].item?.name!!,
-                                                message.value
-                                            ), fcmtoken
-                                        )
-                                    )
-
-                                    viewModel
-                                        .insertMessage(
-                                            MessageResponse.MessageItems
-                                                (
-                                                senderId = senderid,
-                                                receiverId = id,
-                                                message = message.value,
-                                                category = "Exchange",
-                                                read = "false",
-                                                time = System.currentTimeMillis()
-                                            )
-                                        )
-                                        .collect {
-                                            when (it) {
-                                                is ResultState.Success -> {
-                                                    context.showMsg(
-                                                        msg = it.data
-                                                    )
-                                                    message.value = ""
-                                                    lineCount = 1
-                                                }
-
-                                                is ResultState.Failure -> {
-                                                    context.showMsg(
-                                                        msg = it.msg.toString()
-                                                    )
-                                                }
-
-                                                ResultState.Loading -> {
-                                                }
-                                            }
-                                        }
-                                } else {
-                                    context.showMsg("Message cannot be Empty")
-                                }
+                    Box(
+                        modifier = Modifier
+                            .background(background)
+                            .fillMaxHeight(), contentAlignment = Alignment.Center
+                    ) {
+                        BasicTextField(
+                            value = message.value,
+                            onValueChange = { newText ->
+                                message.value = newText
+                                val maxLineLength = 25
+                                lineCount = (newText.length + maxLineLength - 1) / maxLineLength
+                                Log.d("linecount", lineCount.toString())
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                                .padding(top = 25.dp, start = 20.dp)
+                                .fillMaxHeight(), cursorBrush = SolidColor(Color.Black)
+                        ) {
+                            if (message.value == "") {
+                                Text(text = "write a message", color = Color.LightGray)
+                            } else {
+                                Text(text = message.value, color = Color.Black)
 
                             }
-                        }, contentAlignment = Alignment.Center
-                    ) {
-                        Icon(imageVector = Icons.Filled.Send, contentDescription = "", tint = betterWhite)
+                        }
+                    }
+                    Box(Modifier.padding(end = 15.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .clip(CircleShape)
+                                .background(main)
+                                .clickable {
 
+                                    scope.launch(Dispatchers.Main) {
+
+                                        if (message.value.isNotEmpty()) {
+                                            sendNotification(
+                                                PushNotification(
+                                                    NotificationData(
+                                                        currentUserData[0].item?.name!!,
+                                                        message.value
+                                                    ), fcmtoken
+                                                )
+                                            )
+
+                                            viewModel
+                                                .insertMessage(
+                                                    MessageResponse.MessageItems
+                                                        (
+                                                        senderId = senderid,
+                                                        receiverId = id,
+                                                        message = message.value,
+                                                        category = "Exchange",
+                                                        read = "false",
+                                                        time = System.currentTimeMillis()
+                                                    )
+                                                )
+                                                .collect {
+                                                    when (it) {
+                                                        is ResultState.Success -> {
+                                                            context.showMsg(
+                                                                msg = it.data
+                                                            )
+                                                            message.value = ""
+                                                            lineCount = 1
+                                                        }
+
+                                                        is ResultState.Failure -> {
+                                                            context.showMsg(
+                                                                msg = it.msg.toString()
+                                                            )
+                                                        }
+
+                                                        ResultState.Loading -> {
+                                                        }
+                                                    }
+                                                }
+                                        } else {
+                                            context.showMsg("Message cannot be Empty")
+                                        }
+
+                                    }
+                                }, contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Send,
+                                contentDescription = "",
+                                tint = betterWhite
+                            )
+
+                        }
                     }
                 }
             }
@@ -421,7 +450,7 @@ fun messageSender(itemState: MessageResponse) {
                 modifier = Modifier
                     .padding(start = 60.dp, top = 2.dp, bottom = 2.dp, end = 10.dp)
                     .background(background)
-                    .clip(RoundedCornerShape(15.dp)), contentAlignment = Alignment.TopEnd
+                    .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 15.dp)), contentAlignment = Alignment.TopEnd
             ) {
                 if (itemState.item?.ad != null) {
                     Column(
@@ -525,7 +554,7 @@ fun messageSender(itemState: MessageResponse) {
             modifier = Modifier
                 .padding(start = 60.dp, top = 2.dp, bottom = 2.dp, end = 10.dp)
                 .background(background)
-                .clip(RoundedCornerShape(15.dp)), contentAlignment = Alignment.TopEnd
+                .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 15.dp)), contentAlignment = Alignment.TopEnd
         ) {
             Column(
                 modifier = Modifier
@@ -655,7 +684,7 @@ fun MessageReceiver(itemState: MessageResponse,viewModel: ChatViewModel= hiltVie
                 modifier = Modifier
                     .padding(start = 10.dp, top = 2.dp, bottom = 2.dp, end = 60.dp)
                     .background(background)
-                    .clip(RoundedCornerShape(15.dp)), contentAlignment = Alignment.TopStart
+                    .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomEnd = 15.dp)), contentAlignment = Alignment.TopStart
             ) {
                 if (itemState.item?.ad != null) {
                     Column(
@@ -729,7 +758,7 @@ fun MessageReceiver(itemState: MessageResponse,viewModel: ChatViewModel= hiltVie
             modifier = Modifier
                 .padding(start = 10.dp, top = 2.dp, bottom = 2.dp, end = 60.dp)
                 .background(background)
-                .clip(RoundedCornerShape(15.dp)), contentAlignment = Alignment.TopEnd
+                .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomEnd = 15.dp)), contentAlignment = Alignment.TopEnd
         ) {
             Column(
                 modifier = Modifier

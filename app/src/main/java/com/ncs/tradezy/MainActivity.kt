@@ -38,6 +38,7 @@ import com.ncs.tradezy.networkObserver.NetworkConnectivityObserver
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.HostelTheme
 import com.ncs.tradezy.ui.theme.primary
+import com.ncs.tradezy.ui.theme.primaryTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 const val TOPIC = "/topics/myTopic2"
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity() {
         FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
         super.onCreate(savedInstanceState)
         setContent {
+
             connectivityObserver= NetworkConnectivityObserver(LocalContext.current.applicationContext)
             val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
             val viewModel: ProfileActivityViewModel = hiltViewModel()
@@ -88,7 +90,7 @@ class MainActivity : ComponentActivity() {
             val editor: SharedPreferences.Editor = pref.edit()
             editor.putString(KEY_VARIABLE, uid)
             editor.apply()
-            HostelTheme {
+            primaryTheme {
                 if (status==ConnectivityObserver.Status.Available){
                     Box(modifier = Modifier
                         .fillMaxSize()
