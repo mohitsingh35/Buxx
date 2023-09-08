@@ -4,6 +4,7 @@ import android.net.Uri
 import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
 import com.ncs.tradezy.EachAdResponse
+import com.ncs.tradezy.ImageMessage
 import com.ncs.tradezy.MessageResponse
 import com.ncs.tradezy.NotificationContent
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +50,10 @@ interface RealtimeRepository {
         item: MessageResponse.MessageItems
     ): Flow<ResultState<String>>
 
+    fun insertImages(
+        images: List<Uri>,
+        otherdetails: MessageResponse.MessageItems
+    ): Flow<ResultState<String>>
     fun getMessage():Flow<ResultState<List<MessageResponse>>>
 
     fun updateMessage(

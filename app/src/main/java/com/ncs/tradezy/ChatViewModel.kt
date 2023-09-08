@@ -1,5 +1,6 @@
 package com.ncs.tradezy
 
+import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -58,5 +59,6 @@ class ChatViewModel @Inject constructor(
 
     fun update(item: MessageResponse)=repo.updateMessage(item)
     fun insertMessage(item: MessageResponse.MessageItems)=repo.insertMessage(item)
+    fun insertImages(images: List<Uri>,otherDetails:MessageResponse.MessageItems)=repo.insertImages(images,otherDetails)
 
 }

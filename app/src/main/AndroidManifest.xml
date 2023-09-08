@@ -18,15 +18,20 @@
         android:theme="@style/Theme.TradeZY"
         tools:targetApi="31">
         <activity
+            android:name=".ImageHostActivity"
+            android:exported="false"
+            android:label="@string/title_activity_image_host"
+            android:theme="@style/Theme.TradeZY" />
+        <activity
             android:name=".ChatHostActivity"
             android:exported="false"
             android:label="@string/title_activity_chat_host"
             android:theme="@style/Theme.TradeZY" />
         <activity
             android:name=".ChatActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_chat"
-            android:theme="@style/Theme.TradeZY" />
+            android:theme="@style/Theme.TradeZY"></activity>
 
         <service
             android:name=".FirebaseService"

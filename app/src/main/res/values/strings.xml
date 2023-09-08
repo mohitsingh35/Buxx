@@ -5,4 +5,5 @@
     <string name="title_activity_ad_host">AdHostActivity</string>
     <string name="title_activity_chat">ChatActivity</string>
     <string name="title_activity_chat_host">ChatHostActivity</string>
+    <string name="title_activity_image_host">ImageHostActivity</string>
 </resources>

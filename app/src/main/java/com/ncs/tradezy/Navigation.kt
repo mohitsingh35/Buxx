@@ -33,3 +33,15 @@ fun Navigation(
 
     }
 }
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun NavigationChatHost(
+    navController: NavHostController,
+    name:String,id:String,fcmtoken:String,dp:String){
+    val context= LocalContext.current
+    NavHost(navController = navController, startDestination = "chatHost" ){
+        composable("chatHost"){
+            chatHost(name =  name!! , id = id!!, fcmtoken = fcmtoken!!, dp = dp!! )
+        }
+    }
+}

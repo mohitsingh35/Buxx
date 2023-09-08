@@ -7,6 +7,7 @@ data class MessageResponse(
     ){
 
     data class MessageItems(
+        val images: List<String>? = emptyList(),
         val senderId:String?="",
         val receiverId:String?="",
         val message:String?="",

@@ -14,6 +14,7 @@ import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
 import com.ncs.tradezy.EachAdResponse
 import com.ncs.tradezy.HomeScreenState
+import com.ncs.tradezy.ImageMessage
 import com.ncs.tradezy.MessageResponse
 import com.ncs.tradezy.NotificationContent
 
@@ -273,6 +274,33 @@ class RealtimeDBRepository @Inject constructor(
             }.addOnFailureListener {
                 trySend(ResultState.Failure(it))
             }
+            awaitClose {
+                close()
+            }
+        }
+
+    override fun insertImages(images: List<Uri>,otherdetails: MessageResponse.MessageItems): Flow<ResultState<String>> =
+        callbackFlow {
+            trySend(ResultState.Loading)
+            storageReference = FirebaseStorage.getInstance()
+            val totalImages = images.size
+            val imageUrls = mutableListOf<String>()
+            for (i in 0 until totalImages) {
+                val imageRef = storageReference.getReference("images").child("messages").child(System.currentTimeMillis().toString())
+                imageRef.putFile(images[i]).addOnSuccessListener { task ->
+                    task.metadata!!.reference!!.downloadUrl.addOnSuccessListener { imageUrl ->
+                        imageUrls.add(imageUrl.toString())
+                        if (imageUrls.size == totalImages) {
+                            val itemRef = db.child("messages").push()
+                            itemRef.setValue(otherdetails)
+                            itemRef.child("images").setValue(imageUrls)
+                            trySend(ResultState.Success("Inserted Successfully"))
+                            close()
+                        }
+                    }
+                }
+            }
+
             awaitClose {
                 close()
             }

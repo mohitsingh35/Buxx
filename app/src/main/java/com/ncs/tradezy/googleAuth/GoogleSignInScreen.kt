@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ncs.tradezy.MainActivity
 import com.ncs.tradezy.R
+import com.ncs.tradezy.TextAnimation
 import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.main
 
@@ -74,11 +75,48 @@ fun googleScreen(
         .padding(16.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(50.dp))
-            Text(text = "Lets Trade", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+            TextAnimation("Lets Trade \uD83E\uDD11 ","Lets Sell \uD83D\uDCB0 ", counter = 1)
             Spacer(modifier = Modifier.height(100.dp))
-            Image(painter = painterResource(id = R.drawable.pana), contentDescription = "" )
+            Image(painter = painterResource(id = R.drawable.pana), contentDescription = "" ,Modifier.height(345.dp))
             Spacer(modifier = Modifier.height(40.dp))
-            Text(text = "Sell, buy or exchange the desired items", color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text(text = "Got something to sell? \n Connect with potential buyers around you", color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 15.sp, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(40.dp))
+            Box(Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .clickable { navController.navigate("about3") }
+                .background(main), contentAlignment = Alignment.Center) {
+                Row {
+                    Text(text = "Next", color = Color.Black, fontWeight = FontWeight.Medium, fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Image(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = "", modifier = Modifier.size(25.dp) )
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun about3(
+    navController: NavController,
+
+){
+
+    val context= LocalContext.current
+
+    Box( modifier = Modifier
+        .fillMaxSize()
+        .background(background)
+        .padding(16.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(50.dp))
+            Text(text = "Lets Buy \uD83D\uDED2", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+            Spacer(modifier = Modifier.height(100.dp))
+            Image(painter = painterResource(id = R.drawable.buy), contentDescription = "" )
+            Spacer(modifier = Modifier.height(40.dp))
+            Text(text = "Don't want to spend more? \n Explore a wide range from sellers around you", color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 15.sp, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(40.dp))
             Box(Modifier
                 .fillMaxWidth()
@@ -93,10 +131,6 @@ fun googleScreen(
                 }
             }
         }
-//        Button(onClick = onSignInClick) {
-//            Text(text = "Sign In")
-//        }
-
     }
 
 }
@@ -143,16 +177,18 @@ fun about2(
 
     ) { contentPadding ->
         Box( modifier = Modifier
-            .padding(16.dp), contentAlignment = Alignment.Center) {
+            .fillMaxSize()
+            .background(background)
+            .padding(16.dp), contentAlignment = Alignment.TopCenter) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(modifier = Modifier
                     .height(50.dp)
                     .padding(contentPadding))
-                Text(text = "Lets Trade", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+                Text(text = "Lets Exchange \uD83D\uDD01", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 25.sp)
                 Spacer(modifier = Modifier.height(100.dp))
-                Image(painter = painterResource(id = R.drawable.pana), contentDescription = "" )
+                Image(painter = painterResource(id = R.drawable.exchange), contentDescription = "",Modifier.height(345.dp) )
                 Spacer(modifier = Modifier.height(40.dp))
-                Text(text = "Sell, buy or exchange the desired items", color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(text = "Don't want to sell? \n Get the best value around you", color = Color.Gray, fontWeight = FontWeight.Bold, fontSize = 15.sp, textAlign = TextAlign.Center)
                 Spacer(modifier = Modifier.height(40.dp))
                 Box(Modifier
                     .fillMaxWidth()
