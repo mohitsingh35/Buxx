@@ -27,16 +27,22 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -49,10 +55,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
@@ -70,6 +79,7 @@ import com.ncs.tradezy.googleAuth.GoogleAuthActivity
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.betterWhite
+import com.ncs.tradezy.ui.theme.main
 import com.ncs.tradezy.ui.theme.primary
 import com.ncs.tradezy.ui.theme.primaryTheme
 
@@ -91,7 +101,7 @@ class ProfileActivity : ComponentActivity() {
         var token =""
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
             if (!task.isSuccessful) {
-                Log.w("FCM token profile", "Fetching FCM registration token failed", task.exception)
+                Log.w("FCM token profile", "")
                 return@OnCompleteListener
             }
             token = task.result
@@ -112,10 +122,18 @@ class ProfileActivity : ComponentActivity() {
                 if (userList.contains(googleAuthUiClient.getSignedInUser()?.userID)){
                     isUserinDB=true
                 }
-                NavigationUserProfileScreen(navController = navController, isUserinDB = isUserinDB,token=token,googleAuthUiClient)
-
+                if (userList.isEmpty()){
+                    loading()
+                }
+                else{
+                    NavigationUserProfileScreen(navController = navController, isUserinDB = isUserinDB,token=token,googleAuthUiClient)
+                }
             }
         }
+    }
+
+    override fun onBackPressed() {
+        this.startActivity(Intent(this,MainActivity::class.java))
     }
 
 
@@ -141,90 +159,112 @@ fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hil
             userResponse.item?.userId == currentUser
         }
     }
-    if (isUpdate.value){
-        updateUser(isUpdate = isUpdate, itemState = filteredList?.get(0)!! , viewModel = viewModel, fcmToken = token  )
-    }
-    if (createNewUserinDb.value){
-        CreateNewUserinDb(isUpdate = createNewUserinDb, viewModel = viewModel, googleAuthUiClient = googleAuthUiClient)
-    }
-    var udata= filteredList?.get(0)?.item
-    if (isUserinDB){
-        var username by remember {
-            mutableStateOf(udata?.name)
+    if (filteredList?.isNotEmpty() == true) {
+        if (isUpdate.value) {
+            updateUser(
+                isUpdate = isUpdate,
+                itemState = filteredList?.get(0)!!,
+                viewModel = viewModel,
+                fcmToken = token
+            )
         }
-        var email by remember {
-            mutableStateOf(udata?.email)
+        if (createNewUserinDb.value) {
+            CreateNewUserinDb(
+                isUpdate = createNewUserinDb,
+                viewModel = viewModel,
+                googleAuthUiClient = googleAuthUiClient
+            )
         }
-        var phNum by remember {
-            mutableStateOf(udata?.phNumber)
-        }
-        Column(
-            Modifier
-                .fillMaxSize()
-                .background(background)) {
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(Modifier.fillMaxWidth()) {
-                Box(modifier = Modifier
-                    .padding(start = 28.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        context.startActivity(Intent(context, MainActivity::class.java))
-                    }) {
-                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
-                }
-                Box(
-                    modifier = Modifier
-                        .padding(start = 90.dp)
-                        .clip(CircleShape), contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "My Profile",
-                        fontSize = 20.sp,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+        var udata = filteredList?.get(0)?.item
+        if (isUserinDB) {
+            var username by remember {
+                mutableStateOf(udata?.name)
             }
-            Spacer(modifier = Modifier.height(25.dp))
-            LazyColumn(
+            var email by remember {
+                mutableStateOf(udata?.email)
+            }
+            var phNum by remember {
+                mutableStateOf(udata?.phNumber)
+            }
+            Column(
                 Modifier
-                    .fillMaxWidth()
-                    .background(background), horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .background(background)
             ) {
-                items(1) {
-                    ProfileScreenContent(
-                        profileUrl = userData?.profilePictureUrl,
-                        username = username,
-                        email = email,
-                        phNum = phNum,
-                        googleAuthUiClient = googleAuthUiClient,
-                        onClick =  {
-                            isUpdate.value = true
-                        },
-                        navController = navController
-                    )
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier
+                        .padding(start = 28.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            context.startActivity(Intent(context, MainActivity::class.java))
+                        }) {
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
+                    }
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 90.dp)
+                            .clip(CircleShape), contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "My Profile",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
+                Spacer(modifier = Modifier.height(25.dp))
+                LazyColumn(
+                    Modifier
+                        .fillMaxWidth()
+                        .background(background), horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(1) {
+                        ProfileScreenContent(
+                            profileUrl = userData?.profilePictureUrl,
+                            username = username,
+                            email = email,
+                            phNum = phNum,
+                            googleAuthUiClient = googleAuthUiClient,
+                            onClick = {
+                                isUpdate.value = true
+                            },
+                            navController = navController
+                        )
+                    }
 
+                }
             }
+        } else {
+            var username by remember {
+                mutableStateOf(userData?.username)
+            }
+            var email by remember {
+                mutableStateOf(userData?.email)
+            }
+            var phNum by remember {
+                mutableStateOf(userData?.phNum)
+            }
+            Column {
+                ProfileScreenContent(
+                    profileUrl = userData?.profilePictureUrl,
+                    username = username,
+                    email = email,
+                    phNum = phNum,
+                    googleAuthUiClient = googleAuthUiClient,
+                    onClick = {
+                        createNewUserinDb.value = true
+                    },
+                    navController = navController
+                )
+            }
+
+
         }
     }
     else{
-        var username by remember {
-            mutableStateOf(userData?.username)
-        }
-        var email by remember {
-            mutableStateOf(userData?.email)
-        }
-        var phNum by remember {
-            mutableStateOf(userData?.phNum)
-        }
-        Column {
-            ProfileScreenContent(profileUrl = userData?.profilePictureUrl, username = username, email = email, phNum = phNum , googleAuthUiClient = googleAuthUiClient, onClick ={
-                createNewUserinDb.value=true
-            }, navController = navController )
-        }
-
-
+        loading()
     }
 }
 @RequiresApi(Build.VERSION_CODES.O)
@@ -302,7 +342,7 @@ fun ProfileScreenContent(profileUrl:String?,username:String?,email:String?,phNum
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .clickable { navController.navigate("ads")}
+                    .clickable { navController.navigate("ads") }
                     .height(60.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                 Row (Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically){
                     Image(painter = painterResource(id = R.drawable.myads), contentDescription = "",Modifier.size(30.dp))
@@ -405,6 +445,8 @@ fun updateUser(
         mutableStateOf(itemState.item?.phNumber)
     }
 
+    val focusRequester = remember { FocusRequester() }
+    val focusRequester2 = remember { FocusRequester() }
 
     val scope= rememberCoroutineScope()
     val context= LocalContext.current
@@ -432,7 +474,7 @@ fun updateUser(
                         }
                     }
                 }
-            }}) {
+            }}, colors = ButtonDefaults.buttonColors(containerColor = main, contentColor = betterWhite)) {
                 Text(text = "Update")
             }
         }, text = {
@@ -441,23 +483,102 @@ fun updateUser(
                     Text(text = "Update", fontSize = 20.sp)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                username.value?.let {
-                    TextField(value = it, onValueChange ={username.value=it}, label = { Text(
-                        text = "Name"
-                    )} )
-                }
+                OutlinedTextField(
+                    value = username.value!!,
+                    onValueChange = {
+                        username.value = it
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusRequester.requestFocus()
+                        }
+                    ),
+                    label = {
+                        Text(text = "Name")
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                    )
+                )
                 Spacer(modifier = Modifier.height(10.dp))
-                email.value?.let {
-                    TextField(value = it, onValueChange ={email.value=it}, label = { Text(
-                        text = "Email"
-                    )} )
-                }
+                OutlinedTextField(
+                    value = email.value!!,
+                    onValueChange = {
+                        email.value = it
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusRequester.requestFocus()
+                        }
+                    ),
+                    label = {
+                        Text(text = "Email")
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                    )
+                )
                 Spacer(modifier = Modifier.height(10.dp))
-                phNum.value?.let {
-                    TextField(value = it, onValueChange ={phNum.value=it}, label = { Text(
-                        text = "Phone Number"
-                    )} )
-                }
+                OutlinedTextField(
+                    value = phNum.value!!,
+                    onValueChange = {
+                        phNum.value = it
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            scope.launch(Dispatchers.Main) {
+                                viewModel.update(
+                                    RealTimeUserResponse(item = RealTimeUserResponse.RealTimeUsers(name=username.value, email = email.value, phNumber = phNum.value, fcmToken = fcmToken),key = itemState.key)
+                                ).collect{
+                                    when(it){
+                                        is ResultState.Success->{
+                                            context.showMsg(
+                                                msg=it.data
+                                            )
+                                            isUpdate.value=false
+                                            recreateActivity(context)
+
+                                        }
+                                        is ResultState.Failure->{
+                                            context.showMsg(
+                                                msg=it.msg.toString()
+                                            )
+                                        }
+                                        ResultState.Loading->{
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ),
+                    label = {
+                        Text(text = "Phone Number")
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                    )
+                )
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -482,7 +603,7 @@ fun CreateNewUserinDb(
     val phNum= remember {
         mutableStateOf(data?.phNum)
     }
-
+    val focusRequester = remember { FocusRequester() }
 
     val scope= rememberCoroutineScope()
     val context= LocalContext.current
@@ -511,7 +632,7 @@ fun CreateNewUserinDb(
                         }
                     }
                 }
-            }}) {
+            }},colors = ButtonDefaults.buttonColors(containerColor = main, contentColor = betterWhite)) {
                 Text(text = "Update")
             }
         }, text = {
@@ -520,23 +641,103 @@ fun CreateNewUserinDb(
                     Text(text = "Update", fontSize = 20.sp)
                 }
                 Spacer(modifier = Modifier.height(20.dp))
-                username.value?.let {
-                    TextField(value = it, onValueChange ={username.value=it}, label = { Text(
-                        text = "Name"
-                    )} )
-                }
+                OutlinedTextField(
+                    value = username.value!!,
+                    onValueChange = {
+                        username.value = it
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusRequester.requestFocus()
+                        }
+                    ),
+                    label = {
+                        Text(text = "Name")
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                    )
+                )
                 Spacer(modifier = Modifier.height(10.dp))
-                email.value?.let {
-                    TextField(value = it, onValueChange ={email.value=it}, label = { Text(
-                        text = "Email"
-                    )} )
-                }
+                OutlinedTextField(
+                    value = email.value!!,
+                    onValueChange = {
+                        email.value = it
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusRequester.requestFocus()
+                        }
+                    ),
+                    label = {
+                        Text(text = "Email")
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                    )
+                )
                 Spacer(modifier = Modifier.height(10.dp))
-                phNum.value?.let {
-                    TextField(value = it, onValueChange ={phNum.value=it}, label = { Text(
-                        text = "Phone Number"
-                    )} )
-                }
+                OutlinedTextField(
+                    value = phNum.value!!,
+                    onValueChange = {
+                        phNum.value = it
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            scope.launch(Dispatchers.Main) {
+                                viewModel.insertUser(
+                                    RealTimeUserResponse.RealTimeUsers
+                                        (userId = data?.userID,name = username.value,phNumber = phNum.value,profileDPurl = data?.profilePictureUrl,email = email.value)).collect {
+                                    when (it) {
+                                        is ResultState.Success -> {
+                                            context.showMsg(
+                                                msg = it.data
+                                            )
+                                            isUpdate.value=false
+                                            recreateActivity(context)
+                                        }
+
+                                        is ResultState.Failure -> {
+                                            context.showMsg(
+                                                msg = it.msg.toString()
+                                            )
+                                        }
+
+                                        ResultState.Loading -> {
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ),
+                    label = {
+                        Text(text = "Phone Number")
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                    )
+                )
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }

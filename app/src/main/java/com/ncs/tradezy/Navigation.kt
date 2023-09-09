@@ -1,6 +1,7 @@
 package com.ncs.tradezy
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +33,9 @@ fun Navigation(
         }
         composable("notificationScreen"){
             notificationsScreen(navController = navController)
+        }
+        composable("profile"){
+            context.startActivity(Intent(context,ProfileActivity::class.java))
         }
 
     }

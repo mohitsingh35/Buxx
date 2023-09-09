@@ -128,26 +128,34 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
                     Row {
                         Box(Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
                             Row {
-                                Text(
-                                    text = noticount.toString(),
-                                    Modifier
-                                        .clip(CircleShape)
-                                        .size(25.dp)
-                                        .background(
-                                            Color.Red
-                                        ),
-                                    fontSize = 20.sp,
-                                    color = betterWhite,
-                                    textAlign = TextAlign.Center
-                                )
-                                Icon(imageVector = Icons.Filled.Notifications,
-                                    contentDescription = "",
-                                    tint = betterWhite,
-                                    modifier = Modifier
-                                        .clickable {
-                                            navController.navigate("notificationScreen")
-                                        }
-                                        .size(25.dp))
+                                Box(Modifier.fillMaxHeight()){
+                                    Box(Modifier.padding(top = 5.dp)) {
+                                        Icon(imageVector = Icons.Filled.Notifications,
+                                            contentDescription = "",
+                                            tint = betterWhite,
+                                            modifier = Modifier
+                                                .clickable {
+                                                    navController.navigate("notificationScreen")
+                                                }
+                                                .size(30.dp))
+                                    }
+                                    Box(Modifier.padding(start = 15.dp, bottom = 10.dp)){
+                                        Text(
+                                            text = noticount.toString(),
+                                            Modifier
+                                                .clip(CircleShape)
+                                                .size(20.dp)
+                                                .background(
+                                                    Color.Red
+                                                ),
+                                            fontSize = 15.sp,
+                                            color = betterWhite,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+
+                                }
+
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
                                     text = messagecount.toString(),

@@ -30,13 +30,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
+import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import com.ncs.tradezy.networkObserver.ConnectivityObserver
 import com.ncs.tradezy.networkObserver.NetworkConnectivityObserver
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.HostelTheme
+import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.primary
 import com.ncs.tradezy.ui.theme.primaryTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,12 +54,18 @@ class MainActivity : ComponentActivity() {
     private lateinit var connectivityObserver: ConnectivityObserver
     private var backPressedCount by mutableStateOf(0L)
     private var backPressedToast: Toast? = null
+    private val googleAuthUiClient by lazy {
+        GoogleAuthUIClient(
+            context = applicationContext,
+            oneTapClient = Identity.getSignInClient(applicationContext)
+        )
+    }
 
     val user=FirebaseAuth.getInstance().currentUser?.uid
     @OptIn(ExperimentalPagerApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-
+        var noticount = 0
         FirebaseService.sharedPref = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
         var token =""
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -67,10 +76,24 @@ class MainActivity : ComponentActivity() {
             token = task.result
         })
 
+
         FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
         super.onCreate(savedInstanceState)
         setContent {
-
+            val viewModel2: NotificationViewModel= hiltViewModel()
+            val currentuser = FirebaseAuth.getInstance().currentUser?.uid
+            val res2 = viewModel2.res.value
+            var filtereNotiList = ArrayList<NotificationContent>()
+            for (i in 0 until res2.item.size) {
+                if (res2.item[i].item?.receiverID == currentuser) {
+                    filtereNotiList.add(res2.item[i])
+                }
+            }
+            for (i in 0 until filtereNotiList.size) {
+                if (filtereNotiList[i].item?.read == "false") {
+                    noticount++
+                }
+            }
             connectivityObserver= NetworkConnectivityObserver(LocalContext.current.applicationContext)
             val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
             val viewModel: ProfileActivityViewModel = hiltViewModel()
@@ -94,7 +117,7 @@ class MainActivity : ComponentActivity() {
                 if (status==ConnectivityObserver.Status.Available){
                     Box(modifier = Modifier
                         .fillMaxSize()
-                        .background(primary)){
+                        .background(background)){
                         val navController= rememberNavController()
                         Column(modifier = Modifier
                             .fillMaxHeight()
@@ -112,13 +135,14 @@ class MainActivity : ComponentActivity() {
                             }
                             bottomBar(items = listOf(
                                 BottomBarContent(R.drawable.home,"Home"),
+                                BottomBarContent(R.drawable.search,"Search"),
                                 BottomBarContent(R.drawable.add,"Add"),
-                                BottomBarContent(R.drawable.search,"Search")
+                                BottomBarContent(R.drawable.notifications,"notificationScreen"),
+                                BottomBarContent(R.drawable.ic_launcher_foreground,"profile")
                             ),
                                 navController = navController, onItemClick = {
                                     navController.navigate(it.route)
-                                }
-                            )
+                                }, googleAuthUIClient = googleAuthUiClient, noticount = noticount)
                         }
                     }
                 }
