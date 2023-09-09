@@ -82,5 +82,8 @@ fun NavigationUserProfileScreen(
         composable("ads"){
             adsPage(navController = navController)
         }
+        composable("help"){
+            help(navController = navController)
+        }
     }
 }
