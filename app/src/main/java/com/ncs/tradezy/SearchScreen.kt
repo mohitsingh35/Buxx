@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -56,6 +57,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -105,7 +107,7 @@ fun discoverarea(filterbyTrending: List<EachAdResponse>, filterbyViews:List<Each
             .padding(start = 10.dp)
             .clip(CircleShape)
             .clickable {
-                context.startActivity(Intent(context,MainActivity::class.java))
+                context.startActivity(Intent(context, MainActivity::class.java))
             },
             contentAlignment = Alignment.Center){
             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
@@ -186,7 +188,10 @@ fun searcharea(navController: NavController) {
     var recentSearches by remember {
         mutableStateOf(sharedPreferencesManager.getRecentSearches().toList())
     }
-
+    val list= listOf("Drafter","LabCoat","Chemistry","Desk","Quantum","Chalks","Car")
+    var matchingWords by remember {
+        mutableStateOf(list)
+    }
     val windowInfo = LocalWindowInfo.current
     val focusRequester = remember { FocusRequester() }
 
@@ -225,6 +230,9 @@ fun searcharea(navController: NavController) {
                 onValueChange = {
                     text = it
                     // You can update search suggestions based on the user's input here
+                    matchingWords = list.filter { word ->
+                        word.contains(text, ignoreCase = true)
+                    }
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = androidx.compose.ui.text.input.ImeAction.Search
@@ -256,48 +264,86 @@ fun searcharea(navController: NavController) {
                 )
             )
         }
-        Spacer(modifier = Modifier.height(30.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = "Recent: ", fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight.Bold)
-            Box(modifier = Modifier.padding(end = 20.dp)) {
-                Text(
-                    text = "Clear",
-                    fontSize = 16.sp,
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable {
-                        recentSearches= emptyList()
-                        sharedPreferencesManager.clearRecentSearches()
-                    }
-                )
-            }
-        }
-
-        // Display recent searches in a LazyColumn
-        LazyColumn {
-            items(recentSearches) { search ->
-                Text(
-                    text = search,
-                    fontSize = 16.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Normal,
-                    modifier = Modifier
-                        .padding(16.dp)
+        if (text!=""){
+            Spacer(modifier = Modifier.height(30.dp))
+            LazyColumn {
+                items(matchingWords) { word ->
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .padding(end = 30.dp)
                         .clickable {
-                            // Handle the selection of a recent search
-                            text = search
+                            text = word
+                        }){
+                        Row(Modifier.fillMaxHeight().fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                            Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = word,
+                                    fontSize = 16.sp,
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Normal,
+                                    modifier = Modifier
+                                        .padding(16.dp)
+
+                                )
+                            }
+                            Image(painter = painterResource(id = R.drawable.go), contentDescription = "",Modifier.size(25.dp) )
                         }
-                )
+
+                    }
+
+                }
             }
         }
+        if (text==""){
+            Spacer(modifier = Modifier.height(30.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "Recent ", fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+                Box(modifier = Modifier.padding(end = 20.dp)) {
+                    Text(
+                        text = "Clear",
+                        fontSize = 16.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.clickable {
+                            recentSearches= emptyList()
+                            sharedPreferencesManager.clearRecentSearches()
+                        }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            LazyColumn {
+                items(recentSearches) { search ->
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .padding(end = 30.dp)
+                        .clickable {
+                            text = search
+                        }){
+                        Row(Modifier.fillMaxHeight().fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                            Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
+                                Image(painter = painterResource(id = R.drawable.recent), contentDescription = "",Modifier.size(25.dp) )
+                                Text(
+                                    text = search,
+                                    fontSize = 16.sp,
+                                    color = Color.Black,
+                                    fontWeight = FontWeight.Normal,
+                                    modifier = Modifier
+                                        .padding(16.dp)
 
-        // Display search suggestions based on user input
-        // You can populate this LazyColumn with search suggestions based on the user's input
-        LazyColumn {
-            // Populate with search suggestions based on user input
+                                )
+                            }
+                            Image(painter = painterResource(id = R.drawable.go), contentDescription = "",Modifier.size(25.dp) )
+                        }
+
+                    }
+                }
+            }
         }
     }
 }

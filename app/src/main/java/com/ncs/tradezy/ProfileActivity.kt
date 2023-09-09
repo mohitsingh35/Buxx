@@ -1,5 +1,6 @@
 package com.ncs.tradezy
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -10,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,11 +26,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -43,10 +51,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.OnCompleteListener
@@ -55,8 +68,10 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.googleAuth.GoogleAuthActivity
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
+import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.betterWhite
 import com.ncs.tradezy.ui.theme.primary
+import com.ncs.tradezy.ui.theme.primaryTheme
 
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -83,362 +98,552 @@ class ProfileActivity : ComponentActivity() {
         })
         super.onCreate(savedInstanceState)
         setContent {
-            val viewModel: ProfileActivityViewModel = hiltViewModel()
-            var userList=ArrayList<String>()
-            val res=viewModel.res.value
-            var isUserinDB by remember {
-                mutableStateOf(false)
-            }
-            for (i in 0 until res.item.size){
-                userList.add(res.item[i].item?.userId!!)
-            }
-            if (userList.contains(googleAuthUiClient.getSignedInUser()?.userID)){
-                isUserinDB=true
-            }
+            primaryTheme {
+                val navController= rememberNavController()
+                val viewModel: ProfileActivityViewModel = hiltViewModel()
+                var userList=ArrayList<String>()
+                val res=viewModel.res.value
+                var isUserinDB by remember {
+                    mutableStateOf(false)
+                }
+                for (i in 0 until res.item.size){
+                    userList.add(res.item[i].item?.userId!!)
+                }
+                if (userList.contains(googleAuthUiClient.getSignedInUser()?.userID)){
+                    isUserinDB=true
+                }
+                NavigationUserProfileScreen(navController = navController, isUserinDB = isUserinDB,token=token,googleAuthUiClient)
 
-            ShowUserProfile(isUserinDB, token = token)
-
+            }
         }
     }
-    private fun navigateToSignInActivity() {
-        val intent = Intent(this, GoogleAuthActivity::class.java)
-        intent.flags =
-            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
-        finish()
+
+
+}
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hiltViewModel(),token:String,googleAuthUiClient:GoogleAuthUIClient,navController: NavController){
+    val scope= rememberCoroutineScope()
+    val context= LocalContext.current
+    val userData= googleAuthUiClient.getSignedInUser()
+    val res=viewModel.res.value
+    val currentUser=userData?.userID
+    var filteredList:List<RealTimeUserResponse>?=null
+    val isUpdate = remember {
+        mutableStateOf(false)
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hiltViewModel(),token:String){
-        val scope= rememberCoroutineScope()
-        val userData= googleAuthUiClient.getSignedInUser()
-        val res=viewModel.res.value
-        val currentUser=userData?.userID
-        var filteredList:List<RealTimeUserResponse>?=null
-        val isUpdate = remember {
-            mutableStateOf(false)
+    val createNewUserinDb = remember {
+        mutableStateOf(false)
+    }
+    if (isUserinDB) {
+        filteredList = res.item.filter { userResponse ->
+            userResponse.item?.userId == currentUser
         }
-        val createNewUserinDb = remember {
-            mutableStateOf(false)
+    }
+    if (isUpdate.value){
+        updateUser(isUpdate = isUpdate, itemState = filteredList?.get(0)!! , viewModel = viewModel, fcmToken = token  )
+    }
+    if (createNewUserinDb.value){
+        CreateNewUserinDb(isUpdate = createNewUserinDb, viewModel = viewModel, googleAuthUiClient = googleAuthUiClient)
+    }
+    var udata= filteredList?.get(0)?.item
+    if (isUserinDB){
+        var username by remember {
+            mutableStateOf(udata?.name)
         }
-        if (isUserinDB) {
-            filteredList = res.item.filter { userResponse ->
-                userResponse.item?.userId == currentUser
+        var email by remember {
+            mutableStateOf(udata?.email)
+        }
+        var phNum by remember {
+            mutableStateOf(udata?.phNumber)
+        }
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(background)) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(Modifier.fillMaxWidth()) {
+                Box(modifier = Modifier
+                    .padding(start = 28.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        context.startActivity(Intent(context, MainActivity::class.java))
+                    }) {
+                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
+                }
+                Box(
+                    modifier = Modifier
+                        .padding(start = 90.dp)
+                        .clip(CircleShape), contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "My Profile",
+                        fontSize = 20.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
-        }
-        if (isUpdate.value){
-            updateUser(isUpdate = isUpdate, itemState = filteredList?.get(0)!! , viewModel = viewModel, fcmToken = token  )
-        }
-        if (createNewUserinDb.value){
-            CreateNewUserinDb(isUpdate = createNewUserinDb, viewModel = viewModel)
-        }
-        var udata= filteredList?.get(0)?.item
-        if (isUserinDB){
-            var username by remember {
-                mutableStateOf(udata?.name)
-            }
-            var email by remember {
-                mutableStateOf(udata?.email)
-            }
-            var phNum by remember {
-                mutableStateOf(udata?.phNumber)
-            }
+            Spacer(modifier = Modifier.height(25.dp))
             LazyColumn(
                 Modifier
                     .fillMaxWidth()
-                    .background(primary),horizontalAlignment = Alignment.CenterHorizontally) {
-                items(1){
-                    ProfileScreenContent(profileUrl = userData?.profilePictureUrl, username = username, email = email, phNum = phNum ){
-                        isUpdate.value=true
-                    }
+                    .background(background), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(1) {
+                    ProfileScreenContent(
+                        profileUrl = userData?.profilePictureUrl,
+                        username = username,
+                        email = email,
+                        phNum = phNum,
+                        googleAuthUiClient = googleAuthUiClient,
+                        onClick =  {
+                            isUpdate.value = true
+                        },
+                        navController = navController
+                    )
                 }
 
             }
-        }
-        else{
-            var username by remember {
-                mutableStateOf(userData?.username)
-            }
-            var email by remember {
-                mutableStateOf(userData?.email)
-            }
-            var phNum by remember {
-                mutableStateOf(userData?.phNum)
-            }
-            Column {
-                ProfileScreenContent(profileUrl = userData?.profilePictureUrl, username = username, email = email, phNum = phNum ){
-                   createNewUserinDb.value=true
-                }
-            }
-
-
         }
     }
-    @RequiresApi(Build.VERSION_CODES.O)
-    @Composable
-    fun ProfileScreenContent(profileUrl:String?,username:String?,email:String?,phNum:String?,viewModel: HomeScreenViewModel= hiltViewModel(),onClick:()->Unit,){
-        val res=viewModel.res.value
-        val userads=ArrayList<EachAdResponse>()
-        for (i in 0 until res.item.size){
-            if (res.item[i].item?.sellerId==FirebaseAuth.getInstance().currentUser?.uid){
-                userads.add(res.item[i])
-            }
+    else{
+        var username by remember {
+            mutableStateOf(userData?.username)
         }
-        val activeAds=ArrayList<EachAdResponse>()
-        for (i in 0 until userads.size){
-            if (userads[i].item?.sold=="false"){
-                activeAds.add(userads[i])
-            }
+        var email by remember {
+            mutableStateOf(userData?.email)
         }
-        val soldAds=ArrayList<EachAdResponse>()
-        for (i in 0 until userads.size){
-            if (userads[i].item?.sold=="true"){
-                soldAds.add(userads[i])
-            }
+        var phNum by remember {
+            mutableStateOf(userData?.phNum)
+        }
+        Column {
+            ProfileScreenContent(profileUrl = userData?.profilePictureUrl, username = username, email = email, phNum = phNum , googleAuthUiClient = googleAuthUiClient, onClick ={
+                createNewUserinDb.value=true
+            }, navController = navController )
         }
 
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .background(primary)
-                .padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                AsyncImage(model = profileUrl, contentDescription ="", modifier = Modifier
-                    .size(80.dp)
-                    .clip(
-                        CircleShape
-                    ) )
-                Spacer(modifier = Modifier.height(35.dp))
-                Text(text = username!!, color = betterWhite )
-                Spacer(modifier = Modifier.height(15.dp))
-                Text(text = email!! ,color = betterWhite)
-                Spacer(modifier = Modifier.height(15.dp))
-                Text(text = phNum!!,color = betterWhite )
-                Spacer(modifier = Modifier.height(15.dp))
-                Box(modifier = Modifier
-                    .height(30.dp)
-                    .width(100.dp)
-                    .background(Color.Red)
+
+    }
+}
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun ProfileScreenContent(profileUrl:String?,username:String?,email:String?,phNum:String?,viewModel: HomeScreenViewModel= hiltViewModel(),onClick:()->Unit,googleAuthUiClient:GoogleAuthUIClient,navController: NavController){
+    val res=viewModel.res.value
+    val scope= rememberCoroutineScope()
+    val userads=ArrayList<EachAdResponse>()
+
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(background)
+        .padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        AsyncImage(model = profileUrl, contentDescription ="", modifier = Modifier
+            .size(80.dp)
+            .clip(
+                CircleShape
+            ) )
+        Spacer(modifier = Modifier.height(15.dp))
+        Text(text = "Hi ${username}!", fontSize = 16.sp, color = Color.Black, fontWeight = FontWeight.Light)
+
+        Spacer(modifier = Modifier.height(35.dp))
+        Row (
+            Modifier
+                .fillMaxWidth()
+                .height(30.dp)
+                .padding(end = 40.dp), horizontalArrangement = Arrangement.End){
+            Row (
+                Modifier
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(5.dp))
+                    .clickable { onClick() }, verticalAlignment = Alignment.CenterVertically){
+                Icon(imageVector = Icons.Filled.Edit, contentDescription = "", tint = Color.Gray)
+                Text(text = "Edit", color = Color.Gray, fontSize = 14.sp)
+            }
+        }
+        OutlinedTextField(value = username!!, onValueChange = {  }, label = {
+            Text(
+                text = "Name"
+            )
+        }, readOnly = true,shape = RoundedCornerShape(15.dp), maxLines = 1,
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+
+        OutlinedTextField(value = email!!, onValueChange = { }, label = {
+            Text(
+                text = "Email"
+            )
+        }, readOnly = true,shape = RoundedCornerShape(15.dp), maxLines = 1,
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+
+        OutlinedTextField(value = phNum!!, onValueChange = { }, label = {
+            Text(
+                text = "Phone Number"
+            )
+        }, readOnly = true, shape = RoundedCornerShape(15.dp), maxLines = 1,
+        )
+        Spacer(modifier = Modifier.height(15.dp))
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(15.dp), horizontalAlignment = Alignment.Start){
+            Text(
+                text = "Account",
+                fontSize = 16.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(15.dp))
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { navController.navigate("ads")}
+                    .height(60.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Row (Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically){
+                    Image(painter = painterResource(id = R.drawable.myads), contentDescription = "",Modifier.size(30.dp))
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Column {
+                        Text(
+                            text = "My Ads & Listings",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Normal
+                        )
+                        Text(
+                            text = "All Ads, Active Ads, Sold",
+                            fontSize = 12.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Thin
+                        )
+                    }
+                }
+                Icon(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = "")
+            }
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { }
+                    .height(60.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Row (Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically){
+                    Image(painter = painterResource(id = R.drawable.help), contentDescription = "",Modifier.size(30.dp))
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Column {
+                        Text(
+                            text = "Help",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Normal
+                        )
+                        Text(
+                            text = "About & Terms of Use",
+                            fontSize = 12.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Thin
+                        )
+                    }
+                }
+                Icon(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = "")
+            }
+            val context= LocalContext.current
+            Row(
+                Modifier
+                    .fillMaxWidth()
                     .clickable {
-                        lifecycleScope.launch {
+                        scope.launch {
                             googleAuthUiClient.signOut()
-                            navigateToSignInActivity()
-                        }
-                    }, contentAlignment = Alignment.Center){
-                    Row {
-                        Image(imageVector = Icons.Filled.Clear, contentDescription = "")
-                        Text(text = "SignOut", color = betterWhite)
-                    }
-
-                }
-                Spacer(modifier = Modifier.height(50.dp))
-                Button(onClick = { onClick() }) {
-                    Text(text = "Update")
-                }
-                Column {
-                    Spacer(modifier = Modifier.height(50.dp))
-                    Text(text = "All Ads", color = betterWhite)
-                    Spacer(modifier = Modifier.height(20.dp))
-                    LazyRow(){
-                        items(1){
-
-                            for (i in 0 until userads.size){
-                                eachAd(item = userads[i])
-                            }
-
+                            navigateToSignInActivity(context)
                         }
                     }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(text = "Active Ads", color = betterWhite)
-                    Spacer(modifier = Modifier.height(20.dp))
-                    LazyRow(){
-                        items(1){
-                            for (i in 0 until activeAds.size){
-                                eachAd(item = activeAds[i])
-                            }
-
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(text = "Sold Ads", color = betterWhite)
-                    Spacer(modifier = Modifier.height(20.dp))
-                    LazyRow(){
-                        items(1){
-                            for (i in 0 until soldAds.size){
-                                eachAd(item = soldAds[i])
-                            }
-
-                        }
+                    .height(60.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Row (Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically){
+                    Icon(imageVector = Icons.Filled.Clear, contentDescription = "",Modifier.size(30.dp))
+                    Spacer(modifier = Modifier.width(15.dp))
+                    Column {
+                        Text(
+                            text = "Logout",
+                            fontSize = 16.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Normal
+                        )
+                        Text(
+                            text = "Sad to see you go",
+                            fontSize = 12.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Thin
+                        )
                     }
                 }
-
+                Icon(imageVector = Icons.Filled.KeyboardArrowRight, contentDescription = "")
             }
+        }
+
+
 
     }
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun updateUser(
-        isUpdate: MutableState<Boolean>,
-        itemState: RealTimeUserResponse,
-        viewModel: ProfileActivityViewModel,
-        fcmToken:String,
-        ){
-        val username= remember {
-            mutableStateOf(itemState.item?.name)
-        }
-        val email= remember {
-            mutableStateOf(itemState.item?.email)
-        }
-        val phNum= remember {
-            mutableStateOf(itemState.item?.phNumber)
-        }
+
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun updateUser(
+    isUpdate: MutableState<Boolean>,
+    itemState: RealTimeUserResponse,
+    viewModel: ProfileActivityViewModel,
+    fcmToken:String,
+){
+    val username= remember {
+        mutableStateOf(itemState.item?.name)
+    }
+    val email= remember {
+        mutableStateOf(itemState.item?.email)
+    }
+    val phNum= remember {
+        mutableStateOf(itemState.item?.phNumber)
+    }
 
 
-        val scope= rememberCoroutineScope()
-        val context= LocalContext.current
-        if(isUpdate.value){
-            AlertDialog(onDismissRequest = { isUpdate.value=false }, confirmButton = {
-                Button(onClick = { scope.launch(Dispatchers.Main) {
-                    viewModel.update(
-                        RealTimeUserResponse(item = RealTimeUserResponse.RealTimeUsers(name=username.value, email = email.value, phNumber = phNum.value, fcmToken = fcmToken),key = itemState.key)
-                    ).collect{
-                        when(it){
-                            is ResultState.Success->{
-                                context.showMsg(
-                                    msg=it.data
-                                )
-                                isUpdate.value=false
-                                recreateActivity()
+    val scope= rememberCoroutineScope()
+    val context= LocalContext.current
+    if(isUpdate.value){
+        AlertDialog(onDismissRequest = { isUpdate.value=false }, confirmButton = {
+            Button(onClick = { scope.launch(Dispatchers.Main) {
+                viewModel.update(
+                    RealTimeUserResponse(item = RealTimeUserResponse.RealTimeUsers(name=username.value, email = email.value, phNumber = phNum.value, fcmToken = fcmToken),key = itemState.key)
+                ).collect{
+                    when(it){
+                        is ResultState.Success->{
+                            context.showMsg(
+                                msg=it.data
+                            )
+                            isUpdate.value=false
+                            recreateActivity(context)
 
-                            }
-                            is ResultState.Failure->{
-                                context.showMsg(
-                                    msg=it.msg.toString()
-                                )
-                            }
-                            ResultState.Loading->{
-                            }
+                        }
+                        is ResultState.Failure->{
+                            context.showMsg(
+                                msg=it.msg.toString()
+                            )
+                        }
+                        ResultState.Loading->{
                         }
                     }
-                }}) {
-                    Text(text = "Update")
                 }
-            }, text = {
-                Column {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
-                        Text(text = "Update", fontSize = 20.sp)
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    username.value?.let {
-                        TextField(value = it, onValueChange ={username.value=it}, label = { Text(
-                            text = "Name"
-                        )} )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    email.value?.let {
-                        TextField(value = it, onValueChange ={email.value=it}, label = { Text(
-                            text = "Email"
-                        )} )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    phNum.value?.let {
-                        TextField(value = it, onValueChange ={phNum.value=it}, label = { Text(
-                            text = "Phone Number"
-                        )} )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
+            }}) {
+                Text(text = "Update")
             }
-            )
+        }, text = {
+            Column {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                    Text(text = "Update", fontSize = 20.sp)
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                username.value?.let {
+                    TextField(value = it, onValueChange ={username.value=it}, label = { Text(
+                        text = "Name"
+                    )} )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                email.value?.let {
+                    TextField(value = it, onValueChange ={email.value=it}, label = { Text(
+                        text = "Email"
+                    )} )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                phNum.value?.let {
+                    TextField(value = it, onValueChange ={phNum.value=it}, label = { Text(
+                        text = "Phone Number"
+                    )} )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
-
+        )
     }
-    @OptIn(ExperimentalMaterial3Api::class)
-    @Composable
-    fun CreateNewUserinDb(
-        isUpdate: MutableState<Boolean>,
-        viewModel: ProfileActivityViewModel,
 
-        ){
-        val data=googleAuthUiClient.getSignedInUser()
-        val username= remember {
-            mutableStateOf(data?.username)
-        }
-        val email= remember {
-            mutableStateOf(data?.email)
-        }
-        val phNum= remember {
-            mutableStateOf(data?.phNum)
-        }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateNewUserinDb(
+    isUpdate: MutableState<Boolean>,
+    viewModel: ProfileActivityViewModel,
+    googleAuthUiClient: GoogleAuthUIClient
+    ){
+    val data=googleAuthUiClient.getSignedInUser()
+    val username= remember {
+        mutableStateOf(data?.username)
+    }
+    val email= remember {
+        mutableStateOf(data?.email)
+    }
+    val phNum= remember {
+        mutableStateOf(data?.phNum)
+    }
 
 
-        val scope= rememberCoroutineScope()
-        val context= LocalContext.current
-        if(isUpdate.value){
-            AlertDialog(onDismissRequest = { isUpdate.value=false }, confirmButton = {
-                Button(onClick = { scope.launch(Dispatchers.Main) {
-                    viewModel.insertUser(
-                        RealTimeUserResponse.RealTimeUsers
-                            (userId = data?.userID,name = username.value,phNumber = phNum.value,profileDPurl = data?.profilePictureUrl,email = email.value)).collect {
-                        when (it) {
-                            is ResultState.Success -> {
-                                context.showMsg(
-                                    msg = it.data
-                                )
-                                isUpdate.value=false
-                                recreateActivity()
-                            }
+    val scope= rememberCoroutineScope()
+    val context= LocalContext.current
+    if(isUpdate.value){
+        AlertDialog(onDismissRequest = { isUpdate.value=false }, confirmButton = {
+            Button(onClick = { scope.launch(Dispatchers.Main) {
+                viewModel.insertUser(
+                    RealTimeUserResponse.RealTimeUsers
+                        (userId = data?.userID,name = username.value,phNumber = phNum.value,profileDPurl = data?.profilePictureUrl,email = email.value)).collect {
+                    when (it) {
+                        is ResultState.Success -> {
+                            context.showMsg(
+                                msg = it.data
+                            )
+                            isUpdate.value=false
+                            recreateActivity(context)
+                        }
 
-                            is ResultState.Failure -> {
-                                context.showMsg(
-                                    msg = it.msg.toString()
-                                )
-                            }
+                        is ResultState.Failure -> {
+                            context.showMsg(
+                                msg = it.msg.toString()
+                            )
+                        }
 
-                            ResultState.Loading -> {
-                            }
+                        ResultState.Loading -> {
                         }
                     }
-                }}) {
-                    Text(text = "Update")
                 }
-            }, text = {
-                Column {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
-                        Text(text = "Update", fontSize = 20.sp)
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                    username.value?.let {
-                        TextField(value = it, onValueChange ={username.value=it}, label = { Text(
-                            text = "Name"
-                        )} )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    email.value?.let {
-                        TextField(value = it, onValueChange ={email.value=it}, label = { Text(
-                            text = "Email"
-                        )} )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    phNum.value?.let {
-                        TextField(value = it, onValueChange ={phNum.value=it}, label = { Text(
-                            text = "Phone Number"
-                        )} )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
+            }}) {
+                Text(text = "Update")
             }
-            )
+        }, text = {
+            Column {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                    Text(text = "Update", fontSize = 20.sp)
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                username.value?.let {
+                    TextField(value = it, onValueChange ={username.value=it}, label = { Text(
+                        text = "Name"
+                    )} )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                email.value?.let {
+                    TextField(value = it, onValueChange ={email.value=it}, label = { Text(
+                        text = "Email"
+                    )} )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                phNum.value?.let {
+                    TextField(value = it, onValueChange ={phNum.value=it}, label = { Text(
+                        text = "Phone Number"
+                    )} )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
         }
-
-    }
-    private fun recreateActivity() {
-        val intent = Intent(this, ProfileActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-        startActivity(intent)
-        finish()
+        )
     }
 
 }
 
+fun navigateToSignInActivity(context:Context) {
+    val intent = Intent(context, GoogleAuthActivity::class.java)
+    intent.flags =
+        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+    context.startActivity(intent)
+}
 
+fun recreateActivity(context:Context) {
+    val intent = Intent(context, ProfileActivity::class.java)
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
 
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun adsPage(navController: NavController,viewModel: HomeScreenViewModel= hiltViewModel()){
+    val context= LocalContext.current
+    val res=viewModel.res.value
+    val scope= rememberCoroutineScope()
+    val userads=ArrayList<EachAdResponse>()
+    for (i in 0 until res.item.size){
+        if (res.item[i].item?.sellerId==FirebaseAuth.getInstance().currentUser?.uid){
+            userads.add(res.item[i])
+        }
+    }
+    val activeAds=ArrayList<EachAdResponse>()
+    for (i in 0 until userads.size){
+        if (userads[i].item?.sold=="false"){
+            activeAds.add(userads[i])
+        }
+    }
+    val soldAds=ArrayList<EachAdResponse>()
+    for (i in 0 until userads.size){
+        if (userads[i].item?.sold=="true"){
+            soldAds.add(userads[i])
+        }
+    }
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(background)) {
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier
+                .padding(start = 28.dp)
+                .clip(CircleShape)
+                .clickable {
+                    navController.popBackStack()
+                }) {
+                Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
+            }
+            Box(
+                modifier = Modifier
+                    .padding(start = 90.dp)
+                    .clip(CircleShape), contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "My Listings",
+                    fontSize = 20.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        Column(Modifier.padding(16.dp)) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(text = "All Ads", color = Color.Black)
+            Spacer(modifier = Modifier.height(20.dp))
+            LazyRow(){
+                items(1){
+
+                    for (i in 0 until userads.size){
+                        eachAd(item = userads[i])
+                    }
+
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(text = "Active Ads", color = Color.Black)
+            Spacer(modifier = Modifier.height(20.dp))
+            LazyRow(){
+                items(1){
+                    for (i in 0 until activeAds.size){
+                        eachAd(item = activeAds[i])
+                    }
+
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(text = "Sold Ads", color = Color.Black)
+            Spacer(modifier = Modifier.height(20.dp))
+            LazyRow(){
+                items(1){
+                    for (i in 0 until soldAds.size){
+                        eachAd(item = soldAds[i])
+                    }
+                }
+            }
+        }
+    }
+}

@@ -3,12 +3,14 @@ package com.ncs.tradezy
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import com.ncs.tradezy.repository.RealTimeUserResponse
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -58,6 +60,23 @@ fun NavigationSearchScreen(
         }
         composable("search"){
             searcharea(navController)
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun NavigationUserProfileScreen(
+    navController: NavHostController,isUserinDB:Boolean,token:String,googleAuthUiClient: GoogleAuthUIClient
+){
+    val context= LocalContext.current
+    NavHost(navController = navController, startDestination = "user" ){
+        composable("user"){
+            ShowUserProfile(isUserinDB = isUserinDB, token = token, googleAuthUiClient = googleAuthUiClient, navController = navController)
+        }
+        composable("ads"){
+            adsPage(navController = navController)
         }
     }
 }
