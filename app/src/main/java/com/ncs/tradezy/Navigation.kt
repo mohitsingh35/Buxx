@@ -26,7 +26,7 @@ fun Navigation(
             HomeScreen(token = token, filteredList = filterList, navController = navController)
         }
         composable("Add"){
-            AddScreen(appContext = context, navController = navController)
+            addImages(navController = navController, appContext = context)
         }
         composable("Search"){
             SearchScreen(navController1 = navController)

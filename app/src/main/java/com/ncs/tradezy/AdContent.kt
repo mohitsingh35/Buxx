@@ -16,5 +16,8 @@ data class AdContent(
         val viewCount:String?="",
         val trendingViewCount:String?="",
         val sold:String?="",
+        val tags: List<String>? = emptyList(),
+        val whatsapp:String?="",
+        val whatsappNum:String?=""
     )
 }

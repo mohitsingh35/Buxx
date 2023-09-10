@@ -67,6 +67,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -165,7 +166,7 @@ fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hil
             userResponse.item?.userId == currentUser
         }
     }
-    if (filteredList?.isNotEmpty() == true) {
+    if (res.item.isNotEmpty()!!) {
         if (isUpdate.value) {
             updateUser(
                 isUpdate = isUpdate,
@@ -178,7 +179,8 @@ fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hil
             CreateNewUserinDb(
                 isUpdate = createNewUserinDb,
                 viewModel = viewModel,
-                googleAuthUiClient = googleAuthUiClient
+                googleAuthUiClient = googleAuthUiClient,
+                fcmToken = token
             )
         }
         var udata = filteredList?.get(0)?.item
@@ -544,7 +546,7 @@ fun updateUser(
                     onValueChange = {
                         phNum.value = it
                     },
-                    keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal).copy(
                         imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
@@ -597,7 +599,8 @@ fun updateUser(
 fun CreateNewUserinDb(
     isUpdate: MutableState<Boolean>,
     viewModel: ProfileActivityViewModel,
-    googleAuthUiClient: GoogleAuthUIClient
+    googleAuthUiClient: GoogleAuthUIClient,
+    fcmToken:String
     ){
     val data=googleAuthUiClient.getSignedInUser()
     val username= remember {
@@ -618,7 +621,7 @@ fun CreateNewUserinDb(
             Button(onClick = { scope.launch(Dispatchers.Main) {
                 viewModel.insertUser(
                     RealTimeUserResponse.RealTimeUsers
-                        (userId = data?.userID,name = username.value,phNumber = phNum.value,profileDPurl = data?.profilePictureUrl,email = email.value)).collect {
+                        (userId = data?.userID,name = username.value,phNumber = phNum.value,profileDPurl = data?.profilePictureUrl,email = email.value, fcmToken = fcmToken)).collect {
                     when (it) {
                         is ResultState.Success -> {
                             context.showMsg(
@@ -702,7 +705,7 @@ fun CreateNewUserinDb(
                     onValueChange = {
                         phNum.value = it
                     },
-                    keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal).copy(
                         imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
@@ -823,11 +826,9 @@ fun adsPage(navController: NavController,viewModel: HomeScreenViewModel= hiltVie
             Spacer(modifier = Modifier.height(20.dp))
             LazyRow(){
                 items(1){
-
                     for (i in 0 until userads.size){
                         eachAd(item = userads[i])
                     }
-
                 }
             }
             Spacer(modifier = Modifier.height(20.dp))

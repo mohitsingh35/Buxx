@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalPagerApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-        var noticount = 0
+
         FirebaseService.sharedPref = getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
         var token =""
         FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
         FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
         super.onCreate(savedInstanceState)
         setContent {
+            var noticount = 0
             val viewModel2: NotificationViewModel= hiltViewModel()
             val currentuser = FirebaseAuth.getInstance().currentUser?.uid
             val res2 = viewModel2.res.value
