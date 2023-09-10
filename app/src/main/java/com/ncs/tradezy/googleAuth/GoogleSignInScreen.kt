@@ -73,8 +73,8 @@ fun googleScreen(
     Column( modifier = Modifier
         .fillMaxSize()
         .background(background)
-        .padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        .padding(16.dp), verticalArrangement = Arrangement.Center) {
+        Column(Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             TextAnimation("Lets Trade \uD83E\uDD11 ","Lets Sell \uD83D\uDCB0 ", counter = 1)
             Spacer(modifier = Modifier.height(100.dp))
             Image(painter = painterResource(id = R.drawable.pana), contentDescription = "" ,Modifier.height(345.dp))
@@ -109,8 +109,8 @@ fun about3(
     Column( modifier = Modifier
         .fillMaxSize()
         .background(background)
-        .padding(16.dp), verticalArrangement = Arrangement.SpaceBetween){
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        .padding(16.dp), verticalArrangement = Arrangement.Center){
+        Column(Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Text(text = "Lets Buy \uD83D\uDED2", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 25.sp)
             Spacer(modifier = Modifier.height(100.dp))
             Image(painter = painterResource(id = R.drawable.buy), contentDescription = "" )
@@ -178,8 +178,8 @@ fun about2(
         Column( modifier = Modifier
             .fillMaxSize()
             .background(background)
-            .padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            .padding(16.dp), verticalArrangement = Arrangement.Center) {
+            Column(Modifier.fillMaxSize(),horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Spacer(modifier = Modifier
                     .padding(contentPadding))
                 Text(text = "Lets Exchange \uD83D\uDD01", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 25.sp)
