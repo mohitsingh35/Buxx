@@ -820,37 +820,40 @@ fun adsPage(navController: NavController,viewModel: HomeScreenViewModel= hiltVie
                 )
             }
         }
-        Column(Modifier.padding(16.dp)) {
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(text = "All Ads", color = Color.Black)
-            Spacer(modifier = Modifier.height(20.dp))
-            LazyRow(){
-                items(1){
-                    for (i in 0 until userads.size){
-                        eachAd(item = userads[i])
+        LazyColumn(Modifier.padding(16.dp)) {
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(text = "All Ads", color = Color.Black)
+                Spacer(modifier = Modifier.height(20.dp))
+                LazyRow(){
+                    items(1){
+                        for (i in 0 until userads.size){
+                            eachAd(item = userads[i])
+                        }
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(text = "Active Ads", color = Color.Black)
-            Spacer(modifier = Modifier.height(20.dp))
-            LazyRow(){
-                items(1){
-                    for (i in 0 until activeAds.size){
-                        eachAd(item = activeAds[i])
-                    }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(text = "Active Ads", color = Color.Black)
+                Spacer(modifier = Modifier.height(20.dp))
+                LazyRow(){
+                    items(1){
+                        for (i in 0 until activeAds.size){
+                            eachAd(item = activeAds[i])
+                        }
 
-                }
-            }
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(text = "Sold Ads", color = Color.Black)
-            Spacer(modifier = Modifier.height(20.dp))
-            LazyRow(){
-                items(1){
-                    for (i in 0 until soldAds.size){
-                        eachAd(item = soldAds[i])
                     }
                 }
+                Spacer(modifier = Modifier.height(20.dp))
+                Text(text = "Sold Ads", color = Color.Black)
+                Spacer(modifier = Modifier.height(20.dp))
+                LazyRow(){
+                    items(1){
+                        for (i in 0 until soldAds.size){
+                            eachAd(item = soldAds[i])
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(40.dp))
             }
         }
     }
