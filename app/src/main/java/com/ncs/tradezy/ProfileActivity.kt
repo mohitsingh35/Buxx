@@ -809,8 +809,7 @@ fun adsPage(navController: NavController,viewModel: HomeScreenViewModel= hiltVie
             }
             Box(
                 modifier = Modifier
-                    .padding(start = 90.dp)
-                    .clip(CircleShape), contentAlignment = Alignment.Center
+                    .padding(start = 90.dp), contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "My Listings",

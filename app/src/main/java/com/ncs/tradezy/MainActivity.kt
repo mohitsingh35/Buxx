@@ -126,7 +126,7 @@ class MainActivity : ComponentActivity() {
 
                             Box(modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(0.93f)){
+                                .fillMaxHeight(0.92f)){
                                 if (filteredList.isEmpty()){
                                     Navigation(navController = navController,applicationContext,token)
                                 }
@@ -135,11 +135,11 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                             bottomBar(items = listOf(
-                                BottomBarContent(R.drawable.home,"Home"),
-                                BottomBarContent(R.drawable.search,"Search"),
-                                BottomBarContent(R.drawable.add,"Add"),
-                                BottomBarContent(R.drawable.notifications,"notificationScreen"),
-                                BottomBarContent(R.drawable.ic_launcher_foreground,"profile")
+                                BottomBarContent(R.drawable.home_ic,"Home"),
+                                BottomBarContent(R.drawable.search_ic,"Search"),
+                                BottomBarContent(R.drawable.add_ic,"Add"),
+                                BottomBarContent(R.drawable.notifications_ic,"notificationScreen"),
+                                BottomBarContent(R.drawable.person_ic,"profile")
                             ),
                                 navController = navController, onItemClick = {
                                     navController.navigate(it.route)

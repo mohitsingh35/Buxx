@@ -45,7 +45,7 @@ fun bottomBar(
     noticount: Int
 ){
     val backStackEntry=navController.currentBackStackEntryAsState()
-    Column (Modifier.fillMaxWidth()){
+    Column (Modifier.fillMaxWidth().fillMaxHeight(), verticalArrangement = Arrangement.Center){
         Box(
             Modifier
                 .fillMaxWidth()
@@ -78,13 +78,14 @@ fun BottomBarItem(
     Row() {
         Box(modifier = Modifier
             .size(50.dp)
-            .clip(CircleShape)
+            .clip(RoundedCornerShape(10.dp))
             .background(if (state) main else Color.Transparent)
             .clickable { onItemClick() }, contentAlignment = Alignment.Center){
             if (item.route=="profile"){
                 AsyncImage(model = googleAuthUIClient.getSignedInUser()?.profilePictureUrl, contentDescription = "",modifier = Modifier
-                    .size(33.dp).clip(CircleShape))
+                    .size(35.dp).clip(CircleShape))
             }
+
             else if (item.route=="notificationScreen"){
                 Box(Modifier.fillMaxHeight()){
                     Box(Modifier.padding(top = 5.dp)) {
@@ -95,7 +96,7 @@ fun BottomBarItem(
                                 .size(30.dp))
                     }
                     if (noticount>0){
-                        Box(Modifier.padding(start = 15.dp, bottom = 10.dp)){
+                        Box(Modifier.padding(start = 15.dp, bottom = 5.dp)){
                             Text(
                                 text = noticount.toString(),
                                 Modifier

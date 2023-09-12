@@ -11,6 +11,7 @@ data class NotificationContent(
         val time:Long?=null,
         val receiverID:String?="",
         val senderID:String?="",
-        val read:String?=""
+        val read:String?="",
+        val ad:EachAdResponse?=null,
     )
 }

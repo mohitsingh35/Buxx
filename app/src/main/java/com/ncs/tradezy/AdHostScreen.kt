@@ -158,7 +158,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                 viewModel2.insertNotification(
                     NotificationContent.NotificationItem
                         (title = title,message=message,time = System.currentTimeMillis(),
-                        receiverID = seller.userId,senderID = buyer?.userId, read = "false")).collect {
+                        receiverID = seller.userId,senderID = buyer?.userId, read = "false",ad = item1)).collect {
                     when (it) {
                         is ResultState.Success -> {
                             context.showMsg(
