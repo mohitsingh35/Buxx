@@ -103,42 +103,7 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
         }
     }
     val context = LocalContext.current
-    val res2=viewModel2.res.value
-    if (res2.item.isNotEmpty()) {
 
-
-        val userMessages = mutableListOf<MessageResponse>()
-        val latestMessagesMap = HashMap<String, MessageResponse>()
-
-        for (i in 0 until res2.item.size) {
-            val message = res2.item[i]
-            val senderId = message.item?.senderId
-            val receiverId = message.item?.receiverId
-            val otherUserId = if (senderId == currentuser) receiverId else senderId
-
-            if (senderId == currentuser || receiverId == currentuser) {
-                val existingLatestMessage = latestMessagesMap[otherUserId]
-
-                if (existingLatestMessage == null) {
-                    latestMessagesMap[otherUserId!!] = message
-                } else {
-                    val existingTime = existingLatestMessage.item?.time
-                    val currentTime = message.item?.time
-
-                    if (currentTime != null && (existingTime == null || currentTime > existingTime)) {
-                        latestMessagesMap[otherUserId!!] = message
-                    }
-                }
-            }
-        }
-        userMessages.addAll(latestMessagesMap.values)
-        Log.d("msgUser",userMessages.toString())
-        for (i in 0 until userMessages.size) {
-            if (userMessages[i].item?.receiverId == currentuser && userMessages[i].item?.read=="false") {
-                messagecount++
-            }
-        }
-    }
     
 
 
