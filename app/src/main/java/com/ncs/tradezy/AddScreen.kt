@@ -155,7 +155,7 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
             }
             Box(
                 modifier = Modifier
-                    .padding(start = 120.dp)
+                    .padding(start = 10.dp)
 
             ) {
                 Text(

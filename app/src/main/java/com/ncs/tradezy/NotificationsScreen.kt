@@ -115,7 +115,7 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
             }
             Row(
                 modifier = Modifier
-                    .padding(start = if(noticount==0) 60.dp else 70.dp )
+                    .padding(start = 10.dp )
             ) {
                 Text(
                     text = "Notifications ",
@@ -123,16 +123,16 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
                     color = Color.Black,
                     fontWeight = FontWeight.Bold
                 )
-                if (noticount>1){
-                    Box(modifier = Modifier.height(25.dp), contentAlignment = Alignment.Center){
-                        Text(
-                            text = "($noticount new)",
-                            fontSize = 16.sp,
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+//                if (noticount>1){
+//                    Box(modifier = Modifier.height(25.dp), contentAlignment = Alignment.Center){
+//                        Text(
+//                            text = "($noticount new)",
+//                            fontSize = 16.sp,
+//                            color = Color.Black,
+//                            fontWeight = FontWeight.Bold
+//                        )
+//                    }
+//                }
             }
         }
         Spacer(modifier = Modifier.height(30.dp))

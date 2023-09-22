@@ -122,7 +122,7 @@ class MainActivity : ComponentActivity() {
                         val navController= rememberNavController()
                         Column(modifier = Modifier
                             .fillMaxHeight()
-                            .padding(bottom = 18.dp)) {
+                            .padding(bottom = 10.dp)) {
 
                             Box(modifier = Modifier
                                 .fillMaxWidth()

@@ -211,8 +211,8 @@ fun ShowUserProfile(isUserinDB:Boolean,viewModel: ProfileActivityViewModel = hil
                     }
                     Box(
                         modifier = Modifier
-                            .padding(start = 90.dp)
-                            .clip(CircleShape), contentAlignment = Alignment.Center
+                            .padding(start = 10.dp)
+
                     ) {
                         Text(
                             text = "My Profile",

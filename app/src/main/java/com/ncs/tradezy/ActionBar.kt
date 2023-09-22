@@ -70,6 +70,7 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.accent
+import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.betterWhite
 import com.ncs.tradezy.ui.theme.primary
 import com.ncs.tradezy.ui.theme.secondary
@@ -80,16 +81,10 @@ import kotlinx.coroutines.delay
 fun setActionBar(screenName:String, image: Int,navController: NavController,viewModel: NotificationViewModel= hiltViewModel(),viewModel2: ChatViewModel= hiltViewModel(),userViewModel:ProfileActivityViewModel= hiltViewModel()) {
     val res = viewModel.res.value
     val user=userViewModel.res.value
-    var noticount = 0
     var messagecount=0
     val currentuser = FirebaseAuth.getInstance().currentUser?.uid
-    var filtereNotiList = ArrayList<NotificationContent>()
     var current = ArrayList<RealTimeUserResponse>()
-    for (i in 0 until res.item.size) {
-        if (res.item[i].item?.receiverID == currentuser) {
-            filtereNotiList.add(res.item[i])
-        }
-    }
+
     if (user.item.isNotEmpty()) {
         for (i in 0 until user.item.size) {
             if (user.item[i].item?.userId == currentuser) {
@@ -97,14 +92,46 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
             }
         }
     }
-    for (i in 0 until filtereNotiList.size) {
-        if (filtereNotiList[i].item?.read == "false") {
-            noticount++
-        }
-    }
+
     val context = LocalContext.current
 
-    
+    val res2=viewModel2.res.value
+    if (res2.item.isNotEmpty()) {
+
+
+        val userMessages = mutableListOf<MessageResponse>()
+        val latestMessagesMap = HashMap<String, MessageResponse>()
+
+        for (i in 0 until res2.item.size) {
+            val message = res2.item[i]
+            val senderId = message.item?.senderId
+            val receiverId = message.item?.receiverId
+            val otherUserId = if (senderId == currentuser) receiverId else senderId
+
+            if (senderId == currentuser || receiverId == currentuser) {
+                val existingLatestMessage = latestMessagesMap[otherUserId]
+
+                if (existingLatestMessage == null) {
+                    latestMessagesMap[otherUserId!!] = message
+                } else {
+                    val existingTime = existingLatestMessage.item?.time
+                    val currentTime = message.item?.time
+
+                    if (currentTime != null && (existingTime == null || currentTime > existingTime)) {
+                        latestMessagesMap[otherUserId!!] = message
+                    }
+                }
+            }
+        }
+        userMessages.addAll(latestMessagesMap.values)
+        Log.d("msgUser",userMessages.toString())
+        for (i in 0 until userMessages.size) {
+            if (userMessages[i].item?.receiverId == currentuser && userMessages[i].item?.read=="false") {
+                messagecount++
+            }
+        }
+    }
+
 
 
     Column {
@@ -112,7 +139,7 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(65.dp)
-                    .background(primary)
+                    .background(background)
 
             ) {
 
@@ -125,7 +152,7 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
 
                             Text(
                                 text =if (user.item.isEmpty()) "Welcome" else "Hi, ${current[0].item?.name?.substringBefore(" ")}" ,
-                                color = accent,
+                                color = Color.Black,
                                 fontSize = 25.sp,
                                 fontWeight = FontWeight.Medium
                             )

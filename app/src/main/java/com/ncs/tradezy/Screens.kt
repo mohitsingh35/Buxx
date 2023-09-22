@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.ncs.tradezy.networkObserver.ConnectivityObserver
 import com.ncs.tradezy.networkObserver.NetworkConnectivityObserver
 import com.ncs.tradezy.repository.RealTimeUserResponse
+import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.primary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -51,7 +52,7 @@ fun HomeScreen(
     }
 
     Column(modifier = Modifier
-        .background(primary)
+        .background(background)
         .fillMaxSize()){
         val user=viewModel2.res.value
         val res=viewModel.res.value
