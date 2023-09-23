@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -58,38 +60,62 @@ class ImageHostActivity : ComponentActivity() {
                     .fillMaxSize()
                     .background(betterWhite), contentAlignment = Alignment.Center){
                     Column (Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween){
+                        if (time != " " && name != " ") {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .fillMaxHeight(0.1f)
                                 .background(background)
                         ) {
-                            Row (Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically){
-                                Spacer(modifier = Modifier.width(15.dp))
-                                Box(modifier = Modifier
-                                    .size(30.dp)
-                                    .clip(CircleShape)){
-                                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "", tint = Color.Black, modifier = Modifier
-                                        .size(30.dp)
-                                        .clickable {
-                                            this@ImageHostActivity.startActivity(
-                                                Intent(
-                                                    this@ImageHostActivity,
-                                                    ChatActivity::class.java
-                                                )
-                                            )
-                                        })
-                                }
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Column {
-                                    Text(text = name!!, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
-                                    Row {
-                                        Text(text = convertLongToDate(time!!.toLong()), fontSize = 9.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
-                                        Spacer(modifier = Modifier.width(5.dp))
-                                        Text(text = convertLongToTime(time!!.toLong()), fontSize = 9.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
 
+                                Row(
+                                    Modifier.fillMaxHeight(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Spacer(modifier = Modifier.width(15.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .clip(CircleShape)
+                                    ) {
+                                        Icon(imageVector = Icons.Filled.ArrowBack,
+                                            contentDescription = "",
+                                            tint = Color.Black,
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                                .clickable {
+                                                    this@ImageHostActivity.startActivity(
+                                                        Intent(
+                                                            this@ImageHostActivity,
+                                                            ChatActivity::class.java
+                                                        )
+                                                    )
+                                                })
                                     }
-
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                    Column {
+                                        Text(
+                                            text = name!!,
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.Black
+                                        )
+                                        Row {
+                                            Text(
+                                                text = convertLongToDate(time!!.toLong()),
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = Color.Black
+                                            )
+                                            Spacer(modifier = Modifier.width(5.dp))
+                                            Text(
+                                                text = convertLongToTime(time!!.toLong()),
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = Color.Black
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -107,7 +133,33 @@ fun imageHost(images:List<String>){
     LazyRow(modifier = Modifier.fillMaxWidth()){
         items(1){
             for (i in 0 until images.size){
-                AsyncImage(model = images[i], contentDescription = "", modifier = Modifier.padding(5.dp).fillMaxSize(), contentScale = ContentScale.Fit)
+                Box(modifier = Modifier.width(375.dp).fillMaxHeight()){
+                AsyncImage(model = images[i], contentDescription = "", modifier = Modifier
+                    .padding(5.dp)
+                    .width(375.dp)
+                    .fillMaxHeight(1f), contentScale = ContentScale.Fit)
+                Row(modifier = Modifier
+                    .width(375.dp)
+                    .fillMaxHeight()
+                    .padding(bottom = 20.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
+                    Box(
+                        modifier = Modifier
+                            .height(30.dp)
+                            .width(55.dp)
+                            .clip(
+                                RoundedCornerShape(15.dp)
+                            )
+                            .background(Color.Black),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${i + 1} / ${images.size}",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
             }
         }
     }

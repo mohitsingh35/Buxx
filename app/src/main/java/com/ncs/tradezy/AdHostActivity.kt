@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.ncs.tradezy.ui.theme.HostelTheme
+import com.ncs.tradezy.ui.theme.adhostTheme
+import com.ncs.tradezy.ui.theme.primaryTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -22,7 +24,7 @@ class AdHostActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HostelTheme {
+            adhostTheme {
                 val clickedItem = intent.getSerializableExtra("clickedItem") as? EachAdResponse
                 adHost(item1 = clickedItem!!)
             }
