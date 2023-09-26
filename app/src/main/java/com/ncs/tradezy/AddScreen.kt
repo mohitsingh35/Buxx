@@ -292,7 +292,8 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                             )
                                             Spacer(modifier = Modifier.height(10.dp))
                                             Box(modifier = Modifier
-                                                .fillMaxWidth().padding(end = 20.dp), contentAlignment = Alignment.TopEnd){
+                                                .fillMaxWidth()
+                                                .padding(end = 20.dp), contentAlignment = Alignment.TopEnd){
                                                 Text(
                                                     text = "${title.length}/50 ",
                                                     color = if (title.length > 50) Color.Red else Color.Gray,
@@ -328,7 +329,8 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                             )
                                             Spacer(modifier = Modifier.height(10.dp))
                                             Box(modifier = Modifier
-                                                .fillMaxWidth().padding(end = 20.dp), contentAlignment = Alignment.TopEnd){
+                                                .fillMaxWidth()
+                                                .padding(end = 20.dp), contentAlignment = Alignment.TopEnd){
                                                 Text(
                                                     text = "${desc.length}/300 ",
                                                     color = if (desc.length > 300) Color.Red else Color.Gray,
@@ -607,28 +609,21 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                                 .height(50.dp)
                                                 .clip(RoundedCornerShape(5.dp))
                                                 .clickable {
-                                                    if ( title == ""){
+                                                    if (title == "") {
                                                         context.showMsg("Title cannot be empty")
-                                                    }
-                                                    else if ( desc == ""){
+                                                    } else if (desc == "") {
                                                         context.showMsg("Description cannot be empty")
-                                                    }
-                                                    else if ( price == ""){
+                                                    } else if (price == "") {
                                                         context.showMsg("Price cannot be empty")
-                                                    }
-                                                    else if ( buyerLocation == ""){
+                                                    } else if (buyerLocation == "") {
                                                         context.showMsg("Buyer Location cannot be empty")
-                                                    }
-                                                    else if ( tags.size < 3 ){
+                                                    } else if (tags.size < 3) {
                                                         context.showMsg("Atleast 3 tags are required")
-                                                    }
-                                                    else if (whatsappNumber?.length!=10){
+                                                    } else if (whatsappNumber?.length != 10) {
                                                         context.showMsg("Error in Whatsapp Number")
-                                                    }
-                                                    else if (title == "" || desc == "" || price == "" ||  buyerLocation == "" || tags.size < 3 ){
+                                                    } else if (title == "" || desc == "" || price == "" || buyerLocation == "" || tags.size < 3) {
                                                         context.showMsg("One or more fields are empty")
-                                                    }
-                                                    else {
+                                                    } else {
                                                         isLoading = true
                                                         scope.launch(Dispatchers.Main) {
                                                             viewModel
@@ -654,11 +649,11 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                                                     when (it) {
                                                                         is ResultState.Success -> {
                                                                             imageUris = emptyList()
-                                                                            title=""
-                                                                            desc=""
-                                                                            price=""
-                                                                            buyerLocation=""
-                                                                            tags= emptyList()
+                                                                            title = ""
+                                                                            desc = ""
+                                                                            price = ""
+                                                                            buyerLocation = ""
+                                                                            tags = emptyList()
                                                                             isLoading = false
                                                                             showAdcontent = false
                                                                             context.showMsg(

@@ -12,7 +12,7 @@ data class EachAdResponse(
         val images: List<String>? = emptyList(),
         val title: String? = "",
         val desc: String? = "",
-        val price: Int? = null,
+        var price: Int? = null,
         val time: Long? = null,
         val exchangeable: String? = "",
         val buyerLocation: String? = "",
