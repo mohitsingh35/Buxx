@@ -35,7 +35,7 @@ fun Navigation(
             notificationsScreen(navController = navController)
         }
         composable("profile"){
-            context.startActivity(Intent(context,ProfileActivity::class.java))
+
         }
 
     }

@@ -58,7 +58,6 @@ fun AllItems(
 ){
 
     
-    Log.d("fcm token test", filteredList.toString())
         if (token!="" && (filteredList.isNotEmpty())){
             updatefcmToken(itemState = filteredList[0] , viewModel = viewModel2, newToken = token)
         }
@@ -77,10 +76,13 @@ fun AllItems(
                     continue
                 }
             }
-
-            Box () {
-                Column {
-                    Spacer(modifier = Modifier.height(10.dp))
+            if (filter.isEmpty()){
+                emptyscreen()
+            }
+            else {
+                Box() {
+                    Column {
+                        Spacer(modifier = Modifier.height(10.dp))
 //                    LazyColumn {
 //                        item {
 //                            LazyRow{
@@ -96,47 +98,47 @@ fun AllItems(
 //                            itemHolder(items = filter)
 //                        }
 //                    }
-                    val gridHeight: Dp
-                    val totalItems=filter.size
-                    if (totalItems%2!=0) {
-                        gridHeight = with(LocalDensity.current) {
-                            val gridHeightDp = (totalItems+1)/2 * 300.dp
-                            gridHeightDp.toPx().coerceAtLeast(1f).toDp()
-                        }
-                    }  else {
-                        gridHeight = with(LocalDensity.current) {
-                            val gridHeightDp = totalItems / 2 * 300.dp
-                            gridHeightDp.toPx().coerceAtLeast(1f).toDp()
-                        }
-                    }
-                    LazyColumn() {
-                        item {
-                            LazyRow(Modifier.padding(start = 5.dp)) {
-                                items(3) {
-                                    slider()
-                                }
+                        val gridHeight: Dp
+                        val totalItems = filter.size
+                        if (totalItems % 2 != 0) {
+                            gridHeight = with(LocalDensity.current) {
+                                val gridHeightDp = (totalItems + 1) / 2 * 300.dp
+                                gridHeightDp.toPx().coerceAtLeast(1f).toDp()
                             }
-                            Spacer(modifier = Modifier.height(10.dp))
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
-                                userScrollEnabled = false,
-                                modifier = Modifier.height(gridHeight),
-                                content = {
-                                    items(filter.size) { index ->
-                                        eachItem(
-                                            item = filter[index],
-                                            index = index,
-                                            onItemClick = {
-
-                                            })
+                        } else {
+                            gridHeight = with(LocalDensity.current) {
+                                val gridHeightDp = totalItems / 2 * 300.dp
+                                gridHeightDp.toPx().coerceAtLeast(1f).toDp()
+                            }
+                        }
+                        LazyColumn() {
+                            item {
+                                LazyRow(Modifier.padding(start = 5.dp)) {
+                                    items(3) {
+                                        slider()
                                     }
                                 }
-                            )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    userScrollEnabled = false,
+                                    modifier = Modifier.height(gridHeight),
+                                    content = {
+                                        items(filter.size) { index ->
+                                            eachItem(
+                                                item = filter[index],
+                                                index = index,
+                                                onItemClick = {
+
+                                                })
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
-
         }
 
     
@@ -176,11 +178,13 @@ fun BuyOnly(
                 continue
             }
         }
-
-
-        Box () {
-            Column {
-                Spacer(modifier = Modifier.height(10.dp))
+        if (filter.isEmpty()){
+            emptyscreen()
+        }
+        else {
+            Box() {
+                Column {
+                    Spacer(modifier = Modifier.height(10.dp))
 //                    LazyColumn {
 //                        item {
 //                            LazyRow{
@@ -196,45 +200,46 @@ fun BuyOnly(
 //                            itemHolder(items = filter)
 //                        }
 //                    }
-                val gridHeight: Dp
-                val totalItems=filter.size
-                if (totalItems%2!=0) {
-                    gridHeight = with(LocalDensity.current) {
-                        val gridHeightDp = (totalItems+1)/2 * 300.dp
-                        gridHeightDp.toPx().coerceAtLeast(1f).toDp()
-                    }
-                }  else {
-                    gridHeight = with(LocalDensity.current) {
-                        val gridHeightDp = totalItems / 2 * 300.dp
-                        gridHeightDp.toPx().coerceAtLeast(1f).toDp()
-                    }
-                }
-                LazyColumn() {
-                    item {
-                        LazyRow(Modifier.padding(start = 5.dp)) {
-                            items(3) {
-                                slider()
-                            }
+                    val gridHeight: Dp
+                    val totalItems = filter.size
+                    if (totalItems % 2 != 0) {
+                        gridHeight = with(LocalDensity.current) {
+                            val gridHeightDp = (totalItems + 1) / 2 * 300.dp
+                            gridHeightDp.toPx().coerceAtLeast(1f).toDp()
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            userScrollEnabled = false,
-                            modifier = Modifier.height(gridHeight),
-                            content = {
-                                items(filter.size) { index ->
-                                    eachItem(
-                                        item = filter[index],
-                                        index = index,
-                                        onItemClick = {
-
-                                        })
+                    } else {
+                        gridHeight = with(LocalDensity.current) {
+                            val gridHeightDp = totalItems / 2 * 300.dp
+                            gridHeightDp.toPx().coerceAtLeast(1f).toDp()
+                        }
+                    }
+                    LazyColumn() {
+                        item {
+                            LazyRow(Modifier.padding(start = 5.dp)) {
+                                items(3) {
+                                    slider()
                                 }
                             }
-                        )
-                    }
-                }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                userScrollEnabled = false,
+                                modifier = Modifier.height(gridHeight),
+                                content = {
+                                    items(filter.size) { index ->
+                                        eachItem(
+                                            item = filter[index],
+                                            index = index,
+                                            onItemClick = {
 
+                                            })
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                }
             }
         }
     }
@@ -259,9 +264,13 @@ fun Exchange(
                 continue
             }
         }
-        Box () {
-            Column {
-                Spacer(modifier = Modifier.height(10.dp))
+        if (filter.isEmpty()){
+            emptyscreen()
+        }
+        else {
+            Box() {
+                Column {
+                    Spacer(modifier = Modifier.height(10.dp))
 //                    LazyColumn {
 //                        item {
 //                            LazyRow{
@@ -277,45 +286,46 @@ fun Exchange(
 //                            itemHolder(items = filter)
 //                        }
 //                    }
-                val gridHeight: Dp
-                val totalItems=filter.size
-                if (totalItems%2!=0) {
-                    gridHeight = with(LocalDensity.current) {
-                        val gridHeightDp = (totalItems+1)/2 * 300.dp
-                        gridHeightDp.toPx().coerceAtLeast(1f).toDp()
-                    }
-                }  else {
-                    gridHeight = with(LocalDensity.current) {
-                        val gridHeightDp = totalItems / 2 * 300.dp
-                        gridHeightDp.toPx().coerceAtLeast(1f).toDp()
-                    }
-                }
-                LazyColumn() {
-                    item {
-                        LazyRow(Modifier.padding(start = 5.dp)) {
-                            items(3) {
-                                slider()
-                            }
+                    val gridHeight: Dp
+                    val totalItems = filter.size
+                    if (totalItems % 2 != 0) {
+                        gridHeight = with(LocalDensity.current) {
+                            val gridHeightDp = (totalItems + 1) / 2 * 300.dp
+                            gridHeightDp.toPx().coerceAtLeast(1f).toDp()
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            userScrollEnabled = false,
-                            modifier = Modifier.height(gridHeight),
-                            content = {
-                                items(filter.size) { index ->
-                                    eachItem(
-                                        item = filter[index],
-                                        index = index,
-                                        onItemClick = {
-
-                                        })
+                    } else {
+                        gridHeight = with(LocalDensity.current) {
+                            val gridHeightDp = totalItems / 2 * 300.dp
+                            gridHeightDp.toPx().coerceAtLeast(1f).toDp()
+                        }
+                    }
+                    LazyColumn() {
+                        item {
+                            LazyRow(Modifier.padding(start = 5.dp)) {
+                                items(3) {
+                                    slider()
                                 }
                             }
-                        )
-                    }
-                }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                userScrollEnabled = false,
+                                modifier = Modifier.height(gridHeight),
+                                content = {
+                                    items(filter.size) { index ->
+                                        eachItem(
+                                            item = filter[index],
+                                            index = index,
+                                            onItemClick = {
 
+                                            })
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                }
             }
         }
     }

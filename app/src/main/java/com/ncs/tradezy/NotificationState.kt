@@ -7,3 +7,8 @@ data class NotificationState(
     val error:String = "",
     val isLoading:Boolean=false
 )
+data class promoNotificationState(
+    val item:List<PromotionalNotification> = emptyList(),
+    val error:String = "",
+    val isLoading:Boolean=false
+)

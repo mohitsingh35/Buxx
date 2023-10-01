@@ -46,7 +46,6 @@ fun HomeScreen(
     connectivityObserver= NetworkConnectivityObserver(LocalContext.current.applicationContext)
     val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
 
-    Log.d("fcm token test", token.toString())
     if (token!="" && (filteredList.isNotEmpty())){
         updatefcmToken(itemState = filteredList[0] , viewModel = viewModel2, newToken = token)
     }

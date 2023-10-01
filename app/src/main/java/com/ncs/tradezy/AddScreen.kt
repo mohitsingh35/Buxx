@@ -136,7 +136,12 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
     for (i in 0 until res.item.size){
         userList.add(res.item[i].item?.userId!!)
     }
-
+    var showLoadingDialog by remember {
+        mutableStateOf(false)
+    }
+    if (showLoadingDialog){
+        loadingdialog()
+    }
 
     Column(
         Modifier
@@ -169,9 +174,7 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
         Spacer(modifier = Modifier.height(40.dp))
         if (userList.contains(googleAuthUiClient.getSignedInUser()?.userID)) {
             if (isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                mainLoading()
             } else {
                 LazyColumn() {
                     item {
@@ -510,13 +513,11 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                                             .padding(5.dp)
                                                     ) {
                                                         tags.forEachIndexed { index, tag ->
+
                                                             Box(modifier = Modifier
                                                                 .fillMaxHeight()
                                                                 .padding(end = 5.dp, bottom = 5.dp)
                                                                 .clip(RoundedCornerShape(5.dp))
-                                                                .background(
-                                                                    main
-                                                                )
                                                                 .clickable {
                                                                     tags = tags
                                                                         .toMutableList()
@@ -524,18 +525,7 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                                                 },
                                                                 contentAlignment = Alignment.Center
                                                             ) {
-                                                                Row(
-                                                                    Modifier.padding(
-                                                                        start = 5.dp,
-                                                                        end = 5.dp
-                                                                    )
-                                                                ) {
-                                                                    Text(
-                                                                        text = tag,
-                                                                        color = Color.Black,
-                                                                        fontSize = 24.sp,
-                                                                    )
-                                                                }
+                                                                eachtag(tag = tag)
                                                             }
                                                         }
                                                     }
@@ -657,7 +647,7 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                                                             isLoading = false
                                                                             showAdcontent = false
                                                                             context.showMsg(
-                                                                                msg = it.data
+                                                                                msg = "Ad Posted Successfully"
                                                                             )
                                                                         }
 
@@ -669,7 +659,6 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                                                         }
 
                                                                         ResultState.Loading -> {
-
                                                                         }
                                                                     }
 

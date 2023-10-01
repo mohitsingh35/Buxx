@@ -2,6 +2,7 @@ package com.ncs.tradezy.googleAuth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,11 +29,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.ncs.tradezy.AuthViewModel
 import com.ncs.tradezy.MainActivity
 import com.ncs.tradezy.ProfileScreen
 import com.ncs.tradezy.detailsEnterScreen
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
+import com.ncs.tradezy.internet
+import com.ncs.tradezy.maintenance
 import com.ncs.tradezy.networkObserver.ConnectivityObserver
 import com.ncs.tradezy.networkObserver.NetworkConnectivityObserver
 import com.ncs.tradezy.ui.theme.primaryTheme
@@ -50,18 +58,32 @@ class GoogleAuthActivity : ComponentActivity() {
     }
     private lateinit var connectivityObserver: ConnectivityObserver
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         connectivityObserver=NetworkConnectivityObserver(applicationContext)
         super.onCreate(savedInstanceState)
         setContent {
+            var value by remember {
+                mutableStateOf("")
+            }
             primaryTheme {
+                val databaseReference = FirebaseDatabase.getInstance().reference.child("data").child("maintenance")
+                databaseReference.addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        for (snapshot in dataSnapshot.children) {
+                            val key = snapshot.key
+                            value = snapshot.getValue(String::class.java).toString()
+                        }
+                    }
+                    override fun onCancelled(databaseError: DatabaseError) {
+                    }
+                })
+
                 val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
                 var scope= rememberCoroutineScope()
                 val viewModel2: AuthViewModel = hiltViewModel()
                 val res=viewModel2.res.value
                 var uid = ""
-                if (status==ConnectivityObserver.Status.Available){
+                if (status==ConnectivityObserver.Status.Available && value=="false"){
                     Box(
                         modifier = Modifier.fillMaxSize(),
                     ) {
@@ -233,10 +255,13 @@ class GoogleAuthActivity : ComponentActivity() {
                         }
                     }
                 }
-                else{
+                if (status!=ConnectivityObserver.Status.Available){
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                        Text(text = "Internet Error")
+                        internet()
                     }
+                }
+                if (value=="true"){
+                    maintenance()
                 }
 
             }

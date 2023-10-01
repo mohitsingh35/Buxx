@@ -2,6 +2,7 @@ package com.ncs.tradezy
 
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -51,6 +52,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.betterWhite
@@ -63,9 +68,10 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewModel2: ProfileActivityViewModel= hiltViewModel(),navController: NavController){
+fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(), viewModel2: ProfileActivityViewModel= hiltViewModel(), viewModel3:PromoNotificationViewModel= hiltViewModel(), navController: NavController){
     val res=viewModel.res.value   //noti
     val res2=viewModel2.res.value //user
+    val res3=viewModel3.res.value //promonoti
     var allselected by remember {
         mutableStateOf(true)
     }
@@ -75,17 +81,24 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
     var promotion by remember {
         mutableStateOf(false)
     }
+    var promoNoti=ArrayList<NotificationContent>()
+    for (i in 0 until res3.item.size){
+        promoNoti.add(res3.item[i])
+    }
+    Log.d("promo",promoNoti.toString())
     val currentuser=FirebaseAuth.getInstance().currentUser?.uid
     var filtereNotiList=ArrayList<NotificationContent>()
+    var allNotiList=ArrayList<NotificationContent>()
+
     for (i in 0 until res.item.size){
         if (res.item[i].item?.receiverID==currentuser){
             filtereNotiList.add(res.item[i])
         }
     }
-    var buyerList=ArrayList<String>()
-    for (i in 0 until filtereNotiList.size){
-        buyerList.add(filtereNotiList[i].item?.senderID!!)
-    }
+//    var buyerList=ArrayList<String>()
+//    for (i in 0 until filtereNotiList.size){
+//        buyerList.add(filtereNotiList[i].item?.senderID!!)
+//    }
 
     var noticount = 0
     for (i in 0 until filtereNotiList.size) {
@@ -94,7 +107,18 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
         }
     }
     val context= LocalContext.current
+    if (promoNoti.isNotEmpty() || filtereNotiList.isNotEmpty()) {
+        allNotiList.addAll(promoNoti)
+        allNotiList.addAll(filtereNotiList)
+    }
+    var buyerList=ArrayList<String>()
 
+    var myallnoti: ArrayList<NotificationContent>
+    val myallnoti1= allNotiList.sortedByDescending { it.item?.time }
+    myallnoti= ArrayList(myallnoti1)
+    for (i in 0 until myallnoti.size){
+        buyerList.add(myallnoti[i].item?.senderID!!)
+    }
     Column(
         Modifier
             .fillMaxSize()
@@ -138,7 +162,7 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
         Spacer(modifier = Modifier.height(30.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Box(modifier = Modifier
-                .height(30.dp)
+                .height(40.dp)
                 .clip(
                     RoundedCornerShape(5.dp)
                 )
@@ -160,16 +184,16 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
             }
             Spacer(modifier = Modifier.width(5.dp))
             Box(modifier = Modifier
-                .height(30.dp)
+                .height(40.dp)
+                .clip(
+                    RoundedCornerShape(5.dp)
+                )
                 .weight(1f)
                 .clickable {
                     allselected = false
                     reqselected = true
                     promotion = false
                 }
-                .clip(
-                    RoundedCornerShape(5.dp)
-                )
                 .background(if (reqselected) main else Color.LightGray)
                 .padding(5.dp)
                 , contentAlignment = Alignment.Center){
@@ -182,16 +206,17 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
             }
             Spacer(modifier = Modifier.width(5.dp))
             Box(modifier = Modifier
-                .height(30.dp)
+                .height(40.dp)
+                .clip(
+                    RoundedCornerShape(5.dp)
+                )
                 .weight(1f)
                 .clickable {
                     allselected = false
                     reqselected = false
                     promotion = true
                 }
-                .clip(
-                    RoundedCornerShape(5.dp)
-                )
+
                 .background(if (promotion) main else Color.LightGray)
                 .padding(5.dp)
                 , contentAlignment = Alignment.Center){
@@ -204,23 +229,71 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Box(){
+        Box {
             if (allselected){
-                LazyColumn(){
-                    items(1){
-                        for (i in 0 until filtereNotiList.size){
-                            eachNotificationbox(item = filtereNotiList[i], buyer = buyerList[i] )
-
+                if (res.isLoading){
+                    mainLoading()
+                }
+                else {
+                    if (myallnoti.isEmpty()){
+                        emptyscreen()
+                    }
+                    else {
+                        LazyColumn() {
+                            items(1) {
+                                for (i in 0 until myallnoti.size) {
+                                    if (myallnoti[i].item?.sendername!=""){
+                                        promtioneachNoti(item = myallnoti[i])
+                                    }
+                                    if (myallnoti[i].item?.sendername=="" || myallnoti[i].item?.sendername==null) {
+                                        eachNotificationbox(
+                                            item = myallnoti[i],
+                                            buyer = buyerList[i]
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
             if (reqselected){
-                LazyColumn(){
-                    items(1){
-                        for (i in 0 until filtereNotiList.size){
-                            eachNotificationbox(item = filtereNotiList[i], buyer = buyerList[i] )
-
+                if (res.isLoading){
+                    mainLoading()
+                }
+                else {
+                    if (filtereNotiList.isEmpty()){
+                        emptyscreen()
+                    }
+                    else {
+                        LazyColumn() {
+                            items(1) {
+                                for (i in 0 until filtereNotiList.size) {
+                                    eachNotificationbox(
+                                        item = filtereNotiList[i],
+                                        buyer = buyerList[i]
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (promotion){
+                if (res.isLoading){
+                    mainLoading()
+                }
+                else {
+                    if (promoNoti.isEmpty()){
+                        emptyscreen()
+                    }
+                    else {
+                        LazyColumn() {
+                            items(1) {
+                                for (i in 0 until promoNoti.size) {
+                                    promtioneachNoti(item = promoNoti[i])
+                                }
+                            }
                         }
                     }
                 }
@@ -228,6 +301,187 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(),viewMo
 
 
         }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun promtioneachNoti(item:NotificationContent,viewModel: PromoNotificationViewModel= hiltViewModel()){
+
+
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+    var read by remember {
+        mutableStateOf(false)
+    }
+    if (item.item?.msgread?.containsKey(FirebaseAuth.getInstance().currentUser?.uid!!) == true){
+        if (item.item?.msgread?.getValue(FirebaseAuth.getInstance().currentUser?.uid!!)==null){
+            read=false
+        }
+    }
+    if (item.item?.msgread?.containsKey(FirebaseAuth.getInstance().currentUser?.uid!!) == false){
+        read=false
+    }
+    if (item.item?.msgread?.containsKey(FirebaseAuth.getInstance().currentUser?.uid!!) == true){
+        if (item.item?.msgread?.getValue(FirebaseAuth.getInstance().currentUser?.uid!!)=="true"){
+            read=true
+        }
+    }
+    val databaseReference = FirebaseDatabase.getInstance().reference.child("data").child("promotional")
+
+    val context= LocalContext.current
+    val scope= rememberCoroutineScope()
+    if (showDialog){
+        AlertDialog(onDismissRequest = { showDialog=false }, confirmButton = {}, text = {
+            Column {
+                Row {
+                    AsyncImage(model = item.item?.senderurl, contentDescription = "",
+                        Modifier
+                            .clip(CircleShape)
+                            .size(40.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column (){
+                        Text(text = item.item?.title!!, color = Color.Black, fontWeight = FontWeight.Medium , fontSize = 18.sp, )
+                        Text(text = "~from ${item.item.sendername}", color = Color.Black, fontWeight =FontWeight.Medium , fontSize = 14.sp)
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
+                    Text(text = item.item?.message!!, color = Color.Black, fontWeight =FontWeight.Medium , fontSize = 14.sp)
+
+
+                }
+            }
+        }
+        )
+    }
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(1.dp)
+        .clip(RoundedCornerShape(20.dp))
+        .height(140.dp)
+        .clickable {
+            showDialog = true
+            val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+            val msgRead = item.item?.msgread?.toMutableMap()
+
+            currentUserUid?.let { uid ->
+                msgRead?.set(uid, "true")
+            }
+
+            scope.launch(Dispatchers.Main) {
+                viewModel
+                    .update(
+                        NotificationContent(
+                            item = NotificationContent.NotificationItem(
+                                msgread = msgRead
+                            ),
+                            key = item.key
+                        )
+                    )
+                    .collect {
+                        when (it) {
+                            is ResultState.Success -> {
+                                context.showMsg(
+                                    msg = ""
+                                )
+                            }
+
+                            is ResultState.Failure -> {
+                                context.showMsg(
+                                    msg = it.msg.toString()
+                                )
+                            }
+
+                            ResultState.Loading -> {
+                            }
+                        }
+                    }
+            }
+
+        }
+        .background(if (!read) main else background)){
+        Row (modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 10.dp), horizontalArrangement = Arrangement.SpaceBetween){
+            Column(
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (!read) msgsent else background)
+                    .padding(10.dp)) {
+                Spacer(modifier = Modifier.height(5.dp))
+                Row {
+                    AsyncImage(model = item.item?.senderurl, contentDescription = "",
+                        Modifier
+                            .clip(CircleShape)
+                            .size(37.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(text = item.item?.title!!, color = Color.Black, fontWeight = if (!read) FontWeight.Bold else FontWeight.Medium, fontSize = 20.sp, maxLines = 1)
+                        Text(text = item.item?.message!!, color = Color.Gray, fontWeight = if (!read) FontWeight.Bold else FontWeight.Medium,fontSize = 10.sp, maxLines = 1)
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(Modifier
+                    .fillMaxWidth()
+                    .height(35.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable {
+                        showDialog = true
+                        val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+                        val msgRead = HashMap<String, String>()
+                        currentUserUid?.let { uid ->
+                            msgRead[uid] = "true"
+                        }
+                        scope.launch(Dispatchers.Main) {
+                            viewModel
+                                .update(
+                                    NotificationContent(
+                                        item = NotificationContent.NotificationItem(
+                                            msgread = msgRead
+                                        ),
+                                        key = item.key
+                                    )
+                                )
+                                .collect {
+                                    when (it) {
+                                        is ResultState.Success -> {
+                                            context.showMsg(
+                                                msg = ""
+                                            )
+                                        }
+
+                                        is ResultState.Failure -> {
+                                            context.showMsg(
+                                                msg = it.msg.toString()
+                                            )
+                                        }
+
+                                        ResultState.Loading -> {
+                                        }
+                                    }
+                                }
+                        }
+                    }
+                    .background(if (!read) main else betterWhite), contentAlignment = Alignment.Center) {
+                    Row {
+                        Text(text = "View", color = Color.Black, fontWeight = FontWeight.Light, fontSize = 14.sp)
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Row (
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(end = 10.dp, start = 10.dp), horizontalArrangement = Arrangement.SpaceBetween){
+                    Text(text = convertLongToDate(item.item?.time!!), fontSize = 12.sp, color = if (!read) Color.Gray else Color.LightGray, fontWeight = if (!read) FontWeight.Bold else FontWeight.Medium)
+                    Text(text = convertLongToTime(item.item?.time!!), fontSize = 12.sp, color = if (!read) Color.Gray else Color.LightGray, fontWeight = if (!read) FontWeight.Bold else FontWeight.Medium)
+                }
+            }
+        }
+
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -328,7 +582,7 @@ fun eachNotificationbox(item:NotificationContent,buyer:String,viewModel2: Profil
                             .size(37.dp))
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
-                        Text(text = item.item?.title!!, color = Color.Black, fontWeight = if (item.item?.read == "false") FontWeight.Bold else FontWeight.Medium, fontSize = 20.sp)
+                        Text(text = item.item?.title!!, color = Color.Black, fontWeight = if (item.item?.read == "false") FontWeight.Bold else FontWeight.Medium, fontSize = 20.sp, maxLines = 1)
                         Text(text = item.item?.message!!, color = Color.Gray, fontWeight = if (item.item?.read == "false") FontWeight.Bold else FontWeight.Medium,fontSize = 10.sp, maxLines = 1)
                     }
                 }

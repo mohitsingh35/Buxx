@@ -11,7 +11,7 @@ plugins {
 android {
     namespace 'com.ncs.tradezy'
     compileSdk 34
-
+    compileSdkVersion "android-UpsideDownCake"
     defaultConfig {
         applicationId "com.ncs.tradezy"
         minSdk 24
@@ -95,7 +95,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:20.6.0")
     implementation 'com.google.firebase:firebase-messaging:23.2.1'
-
     //coil
     implementation 'io.coil-kt:coil-compose:2.4.0'
     //hilt
@@ -116,6 +115,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:0.13.0"
     implementation "androidx.compose.material3:material3:1.1.1"
     implementation "androidx.compose.material3:material3-window-size-class:1.1.1"
+    implementation 'com.github.arpitmx:bitscuit:1.0.6'
 }
 kapt {
     correctErrorTypes true

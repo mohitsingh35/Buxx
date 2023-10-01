@@ -17,6 +17,7 @@ import com.ncs.tradezy.HomeScreenState
 import com.ncs.tradezy.ImageMessage
 import com.ncs.tradezy.MessageResponse
 import com.ncs.tradezy.NotificationContent
+import com.ncs.tradezy.PromotionalNotification
 
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -180,7 +181,31 @@ class RealtimeDBRepository @Inject constructor(
             close()
         }
     }
+    override fun getpromoNotification(): Flow<ResultState<List<NotificationContent>>> = callbackFlow{
+        trySend(ResultState.Loading)
 
+        val valueEvent=object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val items=snapshot.children.map {
+                    NotificationContent(
+                        it.getValue(NotificationContent.NotificationItem::class.java),
+                        key = it.key
+                    )
+                }
+                trySend(ResultState.Success(items))
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                trySend(ResultState.Failure(error.toException()))
+            }
+
+        }
+        db.child("promotional").addValueEventListener(valueEvent)
+        awaitClose{
+            db.child("promotional").removeEventListener(valueEvent)
+            close()
+        }
+    }
     override fun updateNotification(res: NotificationContent): Flow<ResultState<String>> = callbackFlow {
         trySend(ResultState.Loading)
         val map=HashMap<String,Any>()
@@ -198,6 +223,24 @@ class RealtimeDBRepository @Inject constructor(
             close()
         }
     }
+    override fun updatePromoNoti(res: NotificationContent): Flow<ResultState<String>> = callbackFlow {
+        trySend(ResultState.Loading)
+        val map=HashMap<String,Any>()
+        map["msgread"]=res.item?.msgread!!
+
+        db.child("promotional").child(res.key!!).updateChildren(
+            map
+        ).addOnCompleteListener{
+            trySend(ResultState.Success("Updated Successfully"))
+        }
+            .addOnFailureListener {
+                trySend(ResultState.Failure(it))
+            }
+        awaitClose {
+            close()
+        }
+    }
+
 
     override fun insertuser(item: RealTimeUserResponse.RealTimeUsers): Flow<ResultState<String>> =
         callbackFlow {

@@ -1,5 +1,6 @@
 package com.ncs.tradezy
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -75,6 +77,7 @@ fun BottomBarItem(
     onItemClick:()-> Unit,googleAuthUIClient: GoogleAuthUIClient,
     noticount:Int
 ){
+    val context= LocalContext.current
     Row() {
         Box(modifier = Modifier
             .size(50.dp)
@@ -83,7 +86,9 @@ fun BottomBarItem(
             .clickable { onItemClick() }, contentAlignment = Alignment.Center){
             if (item.route=="profile"){
                 AsyncImage(model = googleAuthUIClient.getSignedInUser()?.profilePictureUrl, contentDescription = "",modifier = Modifier
-                    .size(35.dp).clip(CircleShape))
+                    .size(35.dp).clip(CircleShape).clickable { context.startActivity(Intent(context,ProfileActivity::class.java)) }
+                )
+
             }
 
             else if (item.route=="notificationScreen"){

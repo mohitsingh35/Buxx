@@ -116,6 +116,12 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
     var showmarkassoldsheet by remember {
         mutableStateOf(false)
     }
+    var showLoadingDialog by remember {
+        mutableStateOf(false)
+    }
+    var showmsgsentDialog by remember {
+        mutableStateOf(false)
+    }
     val res4=viewModel4.res.value
     var item:EachAdResponse=item1
     for (i in 0 until res4.item.size){
@@ -129,6 +135,12 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
 
     val issold=item.item?.sold
     Log.d("isSold value",item.toString())
+    if (showLoadingDialog){
+        loadingdialog()
+    }
+    if (showmsgsentDialog){
+        msgDialog()
+    }
     if (markassold){
         markassold=false
         LaunchedEffect(key1 = true ){
@@ -205,7 +217,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                     when (it) {
                         is ResultState.Success -> {
                             context.showMsg(
-                                msg = it.data
+                                msg = ""
                             )
                         }
 
@@ -229,7 +241,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                     when (it) {
                         is ResultState.Success -> {
                             context.showMsg(
-                                msg = it.data
+                                msg = "Message Sent"
                             )
                         }
 
@@ -646,23 +658,10 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(16.dp), contentAlignment = Alignment.BottomCenter
+                        .padding(bottom = 25.dp), contentAlignment = Alignment.BottomCenter
                 ) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(65.dp)
-                            .clip(RoundedCornerShape(15.dp))
-                            .background(Color.Transparent),
-                        elevation = 50.dp,
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(65.dp)
-                                .clip(RoundedCornerShape(15.dp))
-                                .background(main), contentAlignment = Alignment.Center
-                        ) {
+
+
                             if (!sameuser) {
                                 Row(
                                     Modifier
@@ -683,7 +682,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                                 color = betterWhite,
                                                 shape = RoundedCornerShape(10.dp)
                                             )
-                                            .background(Color.Green)
+                                            .background(main)
                                             .clickable {
                                                 showBottomSheet = true
                                             }, contentAlignment = Alignment.Center
@@ -691,7 +690,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                         Row {
                                             Icon(
                                                 painter = painterResource(id = R.drawable.buy_ic),
-                                                contentDescription = ""
+                                                contentDescription = "",Modifier.size(25.dp)
                                             )
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Text(text = "Buy")
@@ -715,7 +714,8 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                             Row {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.exchange_ic),
-                                                    contentDescription = "", tint = betterWhite
+                                                    contentDescription = "", tint = betterWhite,
+                                                    modifier = Modifier.size(25.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(10.dp))
                                                 Text(text = "Exchange", color = betterWhite)
@@ -745,15 +745,15 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                                 color = betterWhite,
                                                 shape = RoundedCornerShape(10.dp)
                                             )
-                                            .background(Color.Green)
+                                            .background(main)
                                             .clickable {
-                                                       showmarkassoldsheet=true
+                                                showmarkassoldsheet = true
                                             }, contentAlignment = Alignment.Center
                                     ) {
                                         Row {
                                             Icon(
                                                 imageVector = Icons.Filled.Check,
-                                                contentDescription = ""
+                                                contentDescription = "", modifier = Modifier.size(25.dp)
                                             )
                                             Spacer(modifier = Modifier.width(5.dp))
                                             Box(modifier = Modifier.padding(top = 2.dp)) {
@@ -774,14 +774,14 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                             .height(50.dp)
                                             .background(Color.Red)
                                             .clickable {
-                                                showdeletesheet=true
+                                                showdeletesheet = true
                                             }, contentAlignment = Alignment.Center
                                     ) {
                                         Row {
                                             Icon(
                                                 imageVector = Icons.Filled.Delete,
                                                 contentDescription = "",
-                                                tint = betterWhite
+                                                tint = betterWhite,modifier = Modifier.size(25.dp)
                                             )
                                             Spacer(modifier = Modifier.width(10.dp))
                                             Text(text = "Delete", color = betterWhite)
@@ -821,8 +821,8 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                     }
                                 }
 
-                            }
-                        }
+
+
                     }
                 }
             }
@@ -855,7 +855,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         when (it) {
                             is ResultState.Success -> {
                                 context.showMsg(
-                                    msg = it.data
+                                    msg = ""
                                 )
                                 showexchangesheet=false
                             }
@@ -880,7 +880,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         when (it) {
                             is ResultState.Success -> {
                                 context.showMsg(
-                                    msg = it.data
+                                    msg = "Exchange Request Sent"
                                 )
                                 showexchangesheet=false
                             }
@@ -940,7 +940,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                             when (it) {
                                                 is ResultState.Success -> {
                                                     context.showMsg(
-                                                        msg = it.data
+                                                        msg = "Ad deleted"
                                                     )
                                                     val intent =
                                                         Intent(
@@ -1025,7 +1025,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                             .height(50.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .clickable {
-                                markassold=true
+                                markassold = true
                             }
                             .background(main), contentAlignment = Alignment.Center) {
                             Row {
@@ -1109,7 +1109,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                             .height(50.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .clickable {
-                                sendexcreq=true
+                                sendexcreq = true
                             }
                             .background(main), contentAlignment = Alignment.Center) {
                             Row {
@@ -1285,7 +1285,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                 when (it) {
                                     is ResultState.Success -> {
                                         context.showMsg(
-                                            msg = it.data
+                                            msg = ""
                                         )
                                         showBottomSheet=false
                                     }
@@ -1310,7 +1310,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                 when (it) {
                                     is ResultState.Success -> {
                                         context.showMsg(
-                                            msg = it.data
+                                            msg = "Buy Request Sent"
                                         )
                                         showBottomSheet=false
 

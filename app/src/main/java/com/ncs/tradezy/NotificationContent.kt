@@ -13,5 +13,8 @@ data class NotificationContent(
         val senderID:String?="",
         val read:String?="",
         val ad:EachAdResponse?=null,
+        val msgread:Map<String,String>?= emptyMap(),
+        val senderurl:String?="",
+        val sendername:String?="",
     )
 }

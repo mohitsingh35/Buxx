@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.navigation.compose.rememberNavController
+import com.bitpolarity.bitscuit.Bitscuit
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.auth.api.identity.Identity
@@ -76,32 +77,56 @@ class MainActivity : ComponentActivity() {
             token = task.result
         })
 
-
         FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
         super.onCreate(savedInstanceState)
         setContent {
             var noticount = 0
             val viewModel2: NotificationViewModel= hiltViewModel()
+            val viewModel3: PromoNotificationViewModel= hiltViewModel()
             val currentuser = FirebaseAuth.getInstance().currentUser?.uid
             val res2 = viewModel2.res.value
+            val res3=viewModel3.res.value
             var filtereNotiList = ArrayList<NotificationContent>()
-            for (i in 0 until res2.item.size) {
-                if (res2.item[i].item?.receiverID == currentuser) {
+            var promoNoti=ArrayList<NotificationContent>()
+            for (i in 0 until res3.item.size){
+                promoNoti.add(res3.item[i])
+            }
+            Log.d("promo",promoNoti.toString())
+            var allNotiList=ArrayList<NotificationContent>()
+
+            for (i in 0 until res2.item.size){
+                if (res2.item[i].item?.receiverID==currentuser){
                     filtereNotiList.add(res2.item[i])
                 }
             }
-            for (i in 0 until filtereNotiList.size) {
-                if (filtereNotiList[i].item?.read == "false") {
+
+            val context= LocalContext.current
+            if (promoNoti.isNotEmpty() || filtereNotiList.isNotEmpty()) {
+                allNotiList.addAll(promoNoti)
+                allNotiList.addAll(filtereNotiList)
+            }
+            var myallnoti: ArrayList<NotificationContent>
+            val myallnoti1= allNotiList.sortedByDescending { it.item?.time }
+            myallnoti= ArrayList(myallnoti1)
+            for (i in 0 until myallnoti.size) {
+                if (myallnoti[i].item?.read == "false") {
                     noticount++
                 }
+                if (myallnoti[i].item?.msgread?.containsKey(currentuser)==false && myallnoti[i].item?.read == ""){
+                    noticount++
+                }
+                if (myallnoti[i].item?.msgread?.containsKey(currentuser)==true && myallnoti[i].item?.read == ""){
+                    if (myallnoti[i].item?.msgread?.getValue(currentuser!!)=="false"){
+                        noticount++
+                    }
+                }
+
             }
             connectivityObserver= NetworkConnectivityObserver(LocalContext.current.applicationContext)
             val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
             val viewModel: ProfileActivityViewModel = hiltViewModel()
             val res=viewModel.res.value
             var filteredList= ArrayList<RealTimeUserResponse>()
-
-
                 for (i in 0 until res.item.size){
                     if (res.item[i].item?.userId== user){
                         filteredList.add(res.item[i])
@@ -116,40 +141,66 @@ class MainActivity : ComponentActivity() {
             editor.apply()
             primaryTheme {
                 if (status==ConnectivityObserver.Status.Available){
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        .background(background)){
-                        val navController= rememberNavController()
-                        Column(modifier = Modifier
-                            .fillMaxHeight()
-                            .padding(bottom = 10.dp)) {
+                    if (filteredList.isEmpty()){
+                        mainLoading()
+                    }
+                    else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(background)
+                        ) {
+                            val navController = rememberNavController()
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(bottom = 10.dp)
+                            ) {
 
-                            Box(modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight(0.92f)){
-                                if (filteredList.isEmpty()){
-                                    Navigation(navController = navController,applicationContext,token)
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(0.92f)
+                                ) {
+                                    if (filteredList.isEmpty()) {
+                                        Navigation(
+                                            navController = navController,
+                                            applicationContext,
+                                            token
+                                        )
+                                    } else {
+                                        Navigation(
+                                            navController = navController,
+                                            applicationContext,
+                                            token,
+                                            filteredList
+                                        )
+                                    }
                                 }
-                                else{
-                                    Navigation(navController = navController,applicationContext,token,filteredList)
-                                }
+                                bottomBar(items = listOf(
+                                    BottomBarContent(R.drawable.home_ic, "Home"),
+                                    BottomBarContent(R.drawable.search_ic, "Search"),
+                                    BottomBarContent(R.drawable.add_ic, "Add"),
+                                    BottomBarContent(
+                                        R.drawable.notifications_ic,
+                                        "notificationScreen"
+                                    ),
+                                    BottomBarContent(R.drawable.person_ic, "profile")
+                                ),
+                                    navController = navController,
+                                    onItemClick = {
+                                        navController.navigate(it.route)
+                                    },
+                                    googleAuthUIClient = googleAuthUiClient,
+                                    noticount = noticount
+                                )
                             }
-                            bottomBar(items = listOf(
-                                BottomBarContent(R.drawable.home_ic,"Home"),
-                                BottomBarContent(R.drawable.search_ic,"Search"),
-                                BottomBarContent(R.drawable.add_ic,"Add"),
-                                BottomBarContent(R.drawable.notifications_ic,"notificationScreen"),
-                                BottomBarContent(R.drawable.person_ic,"profile")
-                            ),
-                                navController = navController, onItemClick = {
-                                    navController.navigate(it.route)
-                                }, googleAuthUIClient = googleAuthUiClient, noticount = noticount)
                         }
                     }
                 }
                 else{
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-                        Text(text = "Internet Error")
+                        internet()
                     }
                 }
                 
@@ -172,7 +223,6 @@ class MainActivity : ComponentActivity() {
             backPressedToast?.show()
         }
     }
-
 }
 
 

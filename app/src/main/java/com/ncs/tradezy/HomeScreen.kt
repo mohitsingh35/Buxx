@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
@@ -46,6 +48,7 @@ import coil.compose.AsyncImage
 import com.ncs.tradezy.ui.theme.accent
 import com.ncs.tradezy.ui.theme.betterWhite
 import com.ncs.tradezy.ui.theme.greenbg
+import com.ncs.tradezy.ui.theme.main
 import com.ncs.tradezy.ui.theme.secondary
 import java.io.Serializable
 
@@ -70,111 +73,196 @@ fun eachItem(
     item: EachAdResponse,
     index:Int,
     onItemClick:(EachAdResponse)-> Unit
-){
-    val  context= LocalContext.current
-    Column(
-        Modifier
-            .height(300.dp)
-            .fillMaxWidth(1f)) {
-        Box (modifier = Modifier
-            .clickable {
-                onItemClick(item)
-                val intent = Intent(context, AdHostActivity::class.java)
-                intent.putExtra("clickedItem", item)
-                context.startActivity(intent)
-            }
-            .border(
-                border = BorderStroke(
-                    0.5.dp,
-                    Color.LightGray
-                )
-            )
-            .height(350.dp)
-        ){
-            Column {
-                LazyRow(
-                    Modifier.height(200.dp)
-                ) {
-                    items(item.item?.images?.size!!) { index ->
-                        AsyncImage(model = item.item.images[index], contentDescription =  " ",modifier = Modifier
-                            .width(250.dp)
-                            .height(250.dp)
-                            .padding(end = 5.dp), contentScale = ContentScale.Crop)
-                    }
-                }
-                Row(Modifier.fillMaxWidth()) {
-                    Column(Modifier.fillMaxWidth(0.7f)) {
-                        Box(modifier = Modifier
-                            .padding(start = 15.dp, top = 10.dp)){
-                            Text(text = if (item.item?.title!!.length<=15) item.item.title else ("${item.item.title.substring(0,15)}..."), color = Color.Black, fontSize = 20.sp)
-                        }
-                        Box(modifier = Modifier
-                            .padding(start = 15.dp, top = 10.dp)){
-                            Text(text = item.item?.desc!! , color = Color.Gray, fontSize = 14.sp)
-                        }
-                    }
-                    Box(modifier = Modifier
+) {
+    val context = LocalContext.current
+    Card(
+        modifier = Modifier
+            .height(290.dp)
+            .padding(3.dp)
+            .fillMaxWidth(1f),
+        shape = RoundedCornerShape(15.dp),
+        border = BorderStroke(0.5.dp, Color.LightGray),
+        elevation = 5.dp
+    ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
+            if (item.item?.price == 0) {
+                Box(
+                    modifier = Modifier
+                        .height(35.dp)
                         .fillMaxWidth()
-                        .padding(end = 5.dp, bottom = 5.dp)
-                        .fillMaxHeight()){
-                        Column {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            if (item.item?.exchangeable =="true"){
-                                Box(modifier = Modifier
-                                    .width(75.dp)
-                                    .height(20.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(
-                                        greenbg
-                                    ), contentAlignment = Alignment.Center){
-                                    Row {
-                                        Icon(imageVector = Icons.Filled.Refresh, contentDescription = "", tint = betterWhite, modifier = Modifier.size(10.dp))
-                                        Text(text = "Exchange", color = betterWhite, fontSize = 8.sp)
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(3.dp))
-                            if (item.item?.price==0){
-                                Box(modifier = Modifier
-                                    .height(20.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(
-                                        greenbg
-                                    ), contentAlignment = Alignment.Center){
-                                    Row (Modifier.padding(start = 5.dp, end = 5.dp)){
-                                        Text(text = "₹ Free", color = betterWhite, fontSize = 8.sp)
-                                    }
-                                }
-                            }
-                            if (item.item?.price!=0){
-                                Box(modifier = Modifier
-                                    .height(20.dp)
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(
-                                        greenbg
-                                    ), contentAlignment = Alignment.Center){
-                                    Row (Modifier.padding(start = 5.dp, end = 5.dp)){
-                                        Text(text = "₹ ${item.item?.price}", color = betterWhite, fontSize = 8.sp)
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(3.dp))
-                            Box(modifier = Modifier
-                                .height(20.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(
-                                    greenbg
-                                ), contentAlignment = Alignment.Center){
-                                Row (Modifier.padding(start = 5.dp, end = 5.dp)){
-                                    Icon(imageVector = Icons.Filled.LocationOn, contentDescription = "", tint = betterWhite, modifier = Modifier.size(10.dp))
-                                    Text(text = item.item?.buyerLocation!!, color = betterWhite, fontSize = 8.sp)
-                                }
-                            }
-                        }
+                        .background(
+                            main
+                        ), contentAlignment = Alignment.Center
+                ) {
+                    Row(Modifier.padding(start = 5.dp, end = 5.dp)) {
+                        Text(
+                            text = "₹ Free",
+                            color = Color.DarkGray,
+                            fontSize = 18.sp, fontWeight = FontWeight.ExtraBold,
+                        )
                     }
                 }
 
             }
+            if (item.item?.price != 0) {
+                Box(
+                    modifier = Modifier
+                        .height(35.dp)
+                        .fillMaxWidth()
+                        .background(
+                            main
+                        ), contentAlignment = Alignment.Center
+                ) {
+                    Row(Modifier.padding(start = 5.dp, end = 5.dp)) {
+                        Text(
+                            text = "₹ ${item.item?.price}",
+                            color = Color.DarkGray,
+                            fontSize = 18.sp, fontWeight = FontWeight.ExtraBold,
+                        )
+                    }
+                }
+
+            }
+        }
+        Column {
+            Box(modifier = Modifier
+                .clip(RoundedCornerShape(15.dp))
+                .clickable {
+                    onItemClick(item)
+                    val intent = Intent(context, AdHostActivity::class.java)
+                    intent.putExtra("clickedItem", item)
+                    context.startActivity(intent)
+                }
+                .height(300.dp)
+            ) {
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                        LazyRow(
+                            Modifier
+                                .height(200.dp)
+                                .padding(7.dp)
+                        ) {
+                            items(item.item?.images?.size!!) { index ->
+                                AsyncImage(
+                                    model = item.item.images[index],
+                                    contentDescription = " ",
+                                    modifier = Modifier
+                                        .height(200.dp).clip(RoundedCornerShape(15.dp)).width(160.dp),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
+                        }
+                    Row(Modifier.fillMaxWidth()) {
+                        Column(Modifier.fillMaxWidth(1f)) {
+                            Row (Modifier.fillMaxWidth()) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(start = 15.dp, top = 5.dp)
+                                        .fillMaxWidth(0.7f)
+                                ) {
+                                    Text(
+                                        text = if (item.item?.title!!.length <= 15) item.item.title else ("${
+                                            item.item.title.substring(
+                                                0,
+                                                15
+                                            )
+                                        }..."), color = Color.Black, fontSize = 20.sp
+                                    )
+                                }
+                                Box(modifier = Modifier.padding(top = 5.dp)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .height(20.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(
+                                                main
+                                            ), contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(Modifier.padding(start = 7.dp, end = 7.dp)) {
+                                            Icon(
+                                                imageVector = Icons.Filled.LocationOn,
+                                                contentDescription = "",
+                                                tint = Color.DarkGray,
+                                                modifier = Modifier.size(10.dp)
+                                            )
+                                            Text(
+                                                text = item.item?.buyerLocation!!,
+                                                color = Color.DarkGray,
+                                                fontSize = 8.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight()
+                            ) {
+                                Row {
+                                    Spacer(modifier = Modifier.width(10.dp))
+//                                    if (item.item?.exchangeable == "true") {
+//                                        Box(
+//                                            modifier = Modifier
+//                                                .width(85.dp)
+//                                                .height(20.dp)
+//                                                .clip(RoundedCornerShape(4.dp))
+//                                                .background(
+//                                                    greenbg
+//                                                ), contentAlignment = Alignment.Center
+//                                        ) {
+//                                            Row {
+//                                                Icon(
+//                                                    imageVector = Icons.Filled.Refresh,
+//                                                    contentDescription = "",
+//                                                    tint = betterWhite,
+//                                                    modifier = Modifier.size(10.dp)
+//                                                )
+//                                                Text(
+//                                                    text = "Exchangeable",
+//                                                    color = betterWhite,
+//                                                    fontSize = 8.sp
+//                                                )
+//                                            }
+//                                        }
+//                                    }
+
+                                //                                    Box(
+//                                        modifier = Modifier
+//                                            .height(20.dp)
+//                                            .fillMaxWidth()
+//                                            .clip(RoundedCornerShape(4.dp))
+//                                            .background(
+//                                                greenbg
+//                                            ), contentAlignment = Alignment.Center
+//                                    ) {
+//                                        Row(Modifier.padding(start = 5.dp, end = 5.dp)) {
+//                                            Icon(
+//                                                imageVector = Icons.Filled.LocationOn,
+//                                                contentDescription = "",
+//                                                tint = betterWhite,
+//                                                modifier = Modifier.size(10.dp)
+//                                            )
+//                                            Text(
+//                                                text = item.item?.buyerLocation!!,
+//                                                color = betterWhite,
+//                                                fontSize = 8.sp
+//                                            )
+//                                        }
+//                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
         }
     }
 }

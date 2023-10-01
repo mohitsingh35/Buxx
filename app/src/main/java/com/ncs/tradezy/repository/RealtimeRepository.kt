@@ -7,6 +7,7 @@ import com.ncs.tradezy.EachAdResponse
 import com.ncs.tradezy.ImageMessage
 import com.ncs.tradezy.MessageResponse
 import com.ncs.tradezy.NotificationContent
+import com.ncs.tradezy.PromotionalNotification
 import kotlinx.coroutines.flow.Flow
 
 
@@ -41,8 +42,13 @@ interface RealtimeRepository {
     ): Flow<ResultState<String>>
 
     fun getNotification():Flow<ResultState<List<NotificationContent>>>
+    fun getpromoNotification():Flow<ResultState<List<NotificationContent>>>
 
     fun updateNotification(
+        res: NotificationContent
+    ):Flow<ResultState<String>>
+
+    fun updatePromoNoti(
         res: NotificationContent
     ):Flow<ResultState<String>>
 
