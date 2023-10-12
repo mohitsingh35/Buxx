@@ -62,28 +62,16 @@ class GoogleAuthActivity : ComponentActivity() {
         connectivityObserver=NetworkConnectivityObserver(applicationContext)
         super.onCreate(savedInstanceState)
         setContent {
-            var value by remember {
-                mutableStateOf("")
-            }
+
             primaryTheme {
-                val databaseReference = FirebaseDatabase.getInstance().reference.child("data").child("maintenance")
-                databaseReference.addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        for (snapshot in dataSnapshot.children) {
-                            val key = snapshot.key
-                            value = snapshot.getValue(String::class.java).toString()
-                        }
-                    }
-                    override fun onCancelled(databaseError: DatabaseError) {
-                    }
-                })
+
 
                 val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
                 var scope= rememberCoroutineScope()
                 val viewModel2: AuthViewModel = hiltViewModel()
                 val res=viewModel2.res.value
                 var uid = ""
-                if (status==ConnectivityObserver.Status.Available && value=="false"){
+                if (status==ConnectivityObserver.Status.Available){
                     Box(
                         modifier = Modifier.fillMaxSize(),
                     ) {
@@ -260,10 +248,6 @@ class GoogleAuthActivity : ComponentActivity() {
                         internet()
                     }
                 }
-                if (value=="true"){
-                    maintenance()
-                }
-
             }
             }
 

@@ -435,7 +435,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                             }
                             Box(
                                 modifier = Modifier
-                                    .height(80.dp)
+                                    .height(50.dp)
                                     .width(400.dp)
                                     .background(
                                         Brush.verticalGradient(
@@ -446,6 +446,19 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                         )
                                     )
                             )
+                            Box(modifier =Modifier.fillMaxWidth().height(100.dp).padding(start = 16.dp, top = 10.dp)){
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.Gray)
+                                        .clickable {
+                                                   context.startActivity(Intent(context,MainActivity::class.java))
+                                        }, contentAlignment = Alignment.Center
+                                ){
+                                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "",tint= betterWhite )
+                                }
+                            }
                         }
                         Row(
                             modifier = Modifier
@@ -564,7 +577,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         Spacer(modifier = Modifier.height(10.dp))
                         Box(modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp)) {
                             Text(
-                                text = "Buyer Location",
+                                text = "Buyer Location (Preferred)",
                                 color = Color.Black,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold

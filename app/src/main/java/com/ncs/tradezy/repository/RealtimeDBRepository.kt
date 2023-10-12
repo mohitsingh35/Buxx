@@ -12,6 +12,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
+import com.ncs.tradezy.BuyerLocation
 import com.ncs.tradezy.EachAdResponse
 import com.ncs.tradezy.HomeScreenState
 import com.ncs.tradezy.ImageMessage
@@ -84,6 +85,32 @@ class RealtimeDBRepository @Inject constructor(
         db.child("Ads").addValueEventListener(valueEvent)
         awaitClose{
             db.child("Ads").removeEventListener(valueEvent)
+            close()
+        }
+    }
+    override fun getbuyer(): Flow<ResultState<List<BuyerLocation>>> = callbackFlow{
+        trySend(ResultState.Loading)
+
+        val valueEvent=object :ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val items=snapshot.children.map {
+                    BuyerLocation(
+                        it.getValue(BuyerLocation.BuyerLocationItem::class.java),
+                        key = it.key
+                    )
+                }
+                trySend(ResultState.Success(items))
+            }
+
+
+            override fun onCancelled(error: DatabaseError) {
+                trySend(ResultState.Failure(error.toException()))
+            }
+
+        }
+        db.child("buyerlocation").addValueEventListener(valueEvent)
+        awaitClose{
+            db.child("buyerlocation").removeEventListener(valueEvent)
             close()
         }
     }

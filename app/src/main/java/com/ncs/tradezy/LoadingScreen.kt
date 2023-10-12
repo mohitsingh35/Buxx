@@ -259,3 +259,35 @@ fun msgDialog(){
     })
 
 }
+@Composable
+fun loadingdialog2(){
+    var isPlaying by remember { mutableStateOf(true) }
+    var speed by remember { mutableStateOf(1f) }
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.smallloading)
+    )
+
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = isPlaying,
+        speed = speed,
+        restartOnPlay = false
+    )
+    AlertDialog(onDismissRequest = {}, confirmButton = { /*TODO*/ }, text = {
+        Box(modifier = Modifier
+            , contentAlignment = Alignment.Center){
+            Column {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    LottieAnimation(
+                        composition,
+                        progress,
+                        modifier = Modifier.size(250.dp)
+                    )
+                }
+            }
+        }
+    })
+
+}

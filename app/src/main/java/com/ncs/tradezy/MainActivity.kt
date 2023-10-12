@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,10 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import com.ncs.tradezy.networkObserver.ConnectivityObserver
@@ -88,12 +93,25 @@ class MainActivity : ComponentActivity() {
             val res3=viewModel3.res.value
             var filtereNotiList = ArrayList<NotificationContent>()
             var promoNoti=ArrayList<NotificationContent>()
+            var value by remember {
+                mutableStateOf("")
+            }
+            val databaseReference = FirebaseDatabase.getInstance().reference.child("data").child("maintenance")
+            databaseReference.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    for (snapshot in dataSnapshot.children) {
+                        val key = snapshot.key
+                        value = snapshot.getValue(String::class.java).toString()
+                    }
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                }
+            })
             for (i in 0 until res3.item.size){
                 promoNoti.add(res3.item[i])
             }
             Log.d("promo",promoNoti.toString())
             var allNotiList=ArrayList<NotificationContent>()
-
             for (i in 0 until res2.item.size){
                 if (res2.item[i].item?.receiverID==currentuser){
                     filtereNotiList.add(res2.item[i])
@@ -140,7 +158,7 @@ class MainActivity : ComponentActivity() {
             editor.putString(KEY_VARIABLE, uid)
             editor.apply()
             primaryTheme {
-                if (status==ConnectivityObserver.Status.Available){
+                if (status==ConnectivityObserver.Status.Available  && value=="false"){
                     if (filteredList.isEmpty()){
                         mainLoading()
                     }
@@ -198,10 +216,13 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                else{
+                if (status!=ConnectivityObserver.Status.Available){
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                         internet()
                     }
+                }
+                if (value=="true"){
+                    maintenance()
                 }
                 
             }

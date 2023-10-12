@@ -3,6 +3,7 @@ package com.ncs.tradezy.repository
 import android.net.Uri
 import com.ncs.tradezy.ResultState
 import com.ncs.tradezy.AdContent
+import com.ncs.tradezy.BuyerLocation
 import com.ncs.tradezy.EachAdResponse
 import com.ncs.tradezy.ImageMessage
 import com.ncs.tradezy.MessageResponse
@@ -61,6 +62,8 @@ interface RealtimeRepository {
         otherdetails: MessageResponse.MessageItems
     ): Flow<ResultState<String>>
     fun getMessage():Flow<ResultState<List<MessageResponse>>>
+    fun getbuyer():Flow<ResultState<List<BuyerLocation>>>
+
 
     fun updateMessage(
         res: MessageResponse

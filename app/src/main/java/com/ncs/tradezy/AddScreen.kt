@@ -7,6 +7,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -80,11 +81,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.GenericTypeIndicator
+import com.google.firebase.database.ValueEventListener
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.accent
@@ -100,7 +107,7 @@ import java.time.format.TextStyle
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltViewModel(),appContext:Context){
+fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltViewModel(),appContext:Context,viewModel2:BuyerLocationViewModel= hiltViewModel()){
 
     val context = LocalContext.current
     var title by remember { mutableStateOf("") }
@@ -111,6 +118,9 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
     var unpriced by remember {  mutableStateOf(false) }
     var whatsapp by remember {  mutableStateOf(false) }
     var buyerLocation by remember {  mutableStateOf("") }
+    var buyerLocationDialog by remember {
+        mutableStateOf(false)
+    }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
     val maxImagesToSelect = 6
     var isLoading by remember {  mutableStateOf(false) }
@@ -142,7 +152,50 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
     if (showLoadingDialog){
         loadingdialog()
     }
+    val item= ArrayList<String>()
+    val res2=viewModel2.res.value
+    for (i in 0 until res2.item.size){
+        item.add(res2.item[i].item?.list!!)
+    }
 
+    if (buyerLocationDialog) {
+        if (item.isNotEmpty()) {
+            Dialog(
+                onDismissRequest = {
+                    buyerLocationDialog = false
+                }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(Color.White),
+                ) {
+                    Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Spacer(modifier = Modifier.height(30.dp))
+                        androidx.compose.material.Text(text = "Select the preferred buyer location ")
+                        Spacer(modifier = Modifier.height(30.dp))
+                        LazyColumn (modifier = Modifier.padding(start = 40.dp, end = 40.dp)){
+                            items(1) {
+                                for (i in 0 until item.size){
+                                    eachRow(item =  item[i], onClick = {
+                                        buyerLocation=item[i]
+                                        buyerLocationDialog=false
+                                    })
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            loadingdialog2()
+        }
+
+
+    }
     Column(
         Modifier
             .fillMaxSize()
@@ -407,30 +460,37 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
                                                 }
                                             }
                                             Spacer(modifier = Modifier.height(20.dp))
-                                            OutlinedTextField(
-                                                value = buyerLocation,
-                                                onValueChange = {
-                                                    buyerLocation = it
-                                                },
-                                                keyboardOptions = KeyboardOptions.Default.copy(
-                                                    imeAction = ImeAction.Next
-                                                ),
-                                                keyboardActions = KeyboardActions(
-                                                    onDone = {
-                                                        focusRequester.requestFocus()
-                                                    }
-                                                ),
-                                                label = {
-                                                    Text(text = "Buyer Location")
-                                                },
-                                                shape = RoundedCornerShape(15.dp),
-                                                maxLines = 1,
-                                                modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                colors = OutlinedTextFieldDefaults.colors(
-                                                    focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                                            Box(modifier = Modifier
+                                                .fillMaxWidth()){
+                                                OutlinedTextField(
+                                                    value = buyerLocation,
+                                                    onValueChange = {
+                                                        buyerLocation = it
+                                                    },
+                                                    readOnly = true,
+                                                    keyboardOptions = KeyboardOptions.Default.copy(
+                                                        imeAction = ImeAction.Next
+                                                    ),
+                                                    keyboardActions = KeyboardActions(
+                                                        onDone = {
+                                                            focusRequester.requestFocus()
+                                                        }
+                                                    ),
+                                                    label = {
+                                                        Text(text = "Buyer Location")
+                                                    },
+                                                    enabled = false,
+                                                    shape = RoundedCornerShape(15.dp),
+                                                    maxLines = 1,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth().clickable {
+                                                                                  buyerLocationDialog=true
+                                                        },
+                                                    colors = OutlinedTextFieldDefaults.colors(
+                                                        focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
+                                                    )
                                                 )
-                                            )
+                                            }
                                             Spacer(modifier = Modifier.height(20.dp))
                                             Column(
                                                 Modifier
@@ -835,7 +895,16 @@ fun loadImageBitmap(uri: Uri,context: Context): Bitmap? {
         ImageDecoder.decodeBitmap(source)
     }
 }
-
+@Composable
+fun eachRow(item:String,onClick:()->Unit){
+    Column(
+        Modifier
+            .height(40.dp)
+            .clickable { onClick() }
+            .fillMaxWidth()) {
+        Text(text = item, fontSize = 20.sp)
+    }
+}
 //send sellerid
 //enter token into database
 //handle back click on mainactivity it goes to login screen

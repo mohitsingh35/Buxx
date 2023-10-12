@@ -1,6 +1,4 @@
 package com.ncs.tradezy
-
-
 import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -14,46 +12,29 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AddScreenViewModel @Inject constructor
+class BuyerLocationViewModel @Inject constructor
     (private val repo: RealtimeRepository):ViewModel(){
 
-    private val _res: MutableState<UserState> = mutableStateOf(
-        UserState()
+    private val _res: MutableState<BuyerState> = mutableStateOf(
+        BuyerState()
     )
-    val res: State<UserState> = _res
-
-    private val _updateRes:MutableState<AdContent> = mutableStateOf(
-        AdContent(item = AdContent.AdContentItem(),
-        )
-    )
-    val updateRes:State<AdContent> = _updateRes
-
-
-    fun setData(data: AdContent){
-        _updateRes.value=data
-    }
-
-    fun update(item: AdContent)=repo.updateAd(item)
-    fun updateADstatus(item: AdContent)=repo.updateADstatus(item)
-
-    fun insertAd(items:AdContent.AdContentItem,images:List<Uri>)=repo.insertAd(items,images)
-
+    val res: State<BuyerState> = _res
     init {
         viewModelScope.launch {
-            repo.getUser().collect{
+            repo.getbuyer().collect{
                 when(it){
                     is ResultState.Success->{
-                        _res.value= UserState(
+                        _res.value= BuyerState(
                             item = it.data
                         )
                     }
                     is ResultState.Failure->{
-                        _res.value= UserState(
+                        _res.value= BuyerState(
                             error = it.msg.toString()
                         )
                     }
                     ResultState.Loading->{
-                        _res.value= UserState(
+                        _res.value= BuyerState(
                             isLoading = true
                         )
                     }
