@@ -76,6 +76,7 @@ fun AllItems(
                     continue
                 }
             }
+            val filter2=filter.sortedByDescending { it.item?.time ?: 0  }
             if (filter.isEmpty()){
                 emptyscreen()
             }
@@ -124,9 +125,9 @@ fun AllItems(
                                     userScrollEnabled = false,
                                     modifier = Modifier.height(gridHeight),
                                     content = {
-                                        items(filter.size) { index ->
+                                        items(filter2.size) { index ->
                                             eachItem(
-                                                item = filter[index],
+                                                item = filter2[index],
                                                 index = index,
                                                 onItemClick = {
 
@@ -178,6 +179,7 @@ fun BuyOnly(
                 continue
             }
         }
+        val filter2=filter.sortedByDescending { it.item?.time ?: 0 }
         if (filter.isEmpty()){
             emptyscreen()
         }
@@ -226,9 +228,9 @@ fun BuyOnly(
                                 userScrollEnabled = false,
                                 modifier = Modifier.height(gridHeight),
                                 content = {
-                                    items(filter.size) { index ->
+                                    items(filter2.size) { index ->
                                         eachItem(
-                                            item = filter[index],
+                                            item = filter2[index],
                                             index = index,
                                             onItemClick = {
 
@@ -264,6 +266,8 @@ fun Exchange(
                 continue
             }
         }
+        val filter2=filter.sortedByDescending { it.item?.time ?: 0 }
+
         if (filter.isEmpty()){
             emptyscreen()
         }
@@ -312,9 +316,9 @@ fun Exchange(
                                 userScrollEnabled = false,
                                 modifier = Modifier.height(gridHeight),
                                 content = {
-                                    items(filter.size) { index ->
+                                    items(filter2.size) { index ->
                                         eachItem(
-                                            item = filter[index],
+                                            item = filter2[index],
                                             index = index,
                                             onItemClick = {
 
