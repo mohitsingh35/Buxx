@@ -53,7 +53,6 @@ class RealtimeDBRepository @Inject constructor(
                     }
                 }
             }
-
             awaitClose {
                 close()
             }
@@ -73,10 +72,7 @@ class RealtimeDBRepository @Inject constructor(
                     )
                 }
                 trySend(ResultState.Success(items))
-                Log.d("test",items.toString())
             }
-
-
             override fun onCancelled(error: DatabaseError) {
                 trySend(ResultState.Failure(error.toException()))
             }
@@ -318,7 +314,6 @@ class RealtimeDBRepository @Inject constructor(
                     )
                 }
                 trySend(ResultState.Success(items))
-                Log.d("mohit",items.toString())
             }
 
 

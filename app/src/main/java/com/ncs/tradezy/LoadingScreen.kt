@@ -291,3 +291,44 @@ fun loadingdialog2(){
     })
 
 }
+@Composable
+fun imagesendLoading() {
+    val quotes = listOf("Quote 1", "Quote 2", "Quote 3", "Quote 4", "Quote 5")
+    var isPlaying by remember { mutableStateOf(true) }
+    var speed by remember { mutableStateOf(1f) }
+    var currentQuote by remember { mutableStateOf(quotes.random()) }
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.imagesend)
+    )
+
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = isPlaying,
+        speed = speed,
+        restartOnPlay = false
+    )
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(5000)
+            currentQuote = quotes.random()
+        }
+    }
+
+    Column(
+        Modifier
+            .background(background)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LottieAnimation(
+            composition,
+            progress,
+            modifier = Modifier.size(150.dp)
+        )
+        Text(text = currentQuote, color = Color.LightGray, fontSize = 15.sp)
+    }
+}

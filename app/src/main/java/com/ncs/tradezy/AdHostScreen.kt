@@ -446,14 +446,22 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                         )
                                     )
                             )
-                            Box(modifier =Modifier.fillMaxWidth().height(100.dp).padding(start = 16.dp, top = 10.dp)){
+                            Box(modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .padding(start = 16.dp, top = 10.dp)){
                                 Box(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .clip(CircleShape)
                                         .background(Color.Gray)
                                         .clickable {
-                                                   context.startActivity(Intent(context,MainActivity::class.java))
+                                            context.startActivity(
+                                                Intent(
+                                                    context,
+                                                    MainActivity::class.java
+                                                )
+                                            )
                                         }, contentAlignment = Alignment.Center
                                 ){
                                     Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "",tint= betterWhite )
@@ -552,7 +560,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                            Box(
+                            Row(
                                 modifier = Modifier.padding(
                                     start = 20.dp,
                                     top = 10.dp,
@@ -561,6 +569,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                             ) {
                                 for (i in 0 until item.item?.tags?.size!!) {
                                     eachtag(tag = item.item?.tags!![i]!!)
+                                    Spacer(modifier = Modifier.width(5.dp))
                                 }
 
                             }
@@ -1069,7 +1078,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                 Column(
                     Modifier
                         .fillMaxWidth()
-                        .fillMaxHeight(0.6f)
+                        .fillMaxHeight(0.7f)
                         .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {

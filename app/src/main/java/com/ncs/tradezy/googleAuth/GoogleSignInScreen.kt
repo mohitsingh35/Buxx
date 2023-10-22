@@ -246,7 +246,7 @@ fun about2(
                             Spacer(modifier = Modifier.height(30.dp))
                             Text(text = "*by continuing you Accept our Terms and Privacy Policies", color = Color.LightGray, fontWeight = FontWeight.Medium, fontSize = 12.sp, textAlign = TextAlign.Center)
                             Spacer(modifier = Modifier.height(30.dp))
-                            Text(text = "With ❤️ by TradeZ", color = Color.LightGray, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, textAlign = TextAlign.Center)
+                            Text(text = "With ❤️ by Buxx", color = Color.LightGray, fontWeight = FontWeight.ExtraBold, fontSize = 12.sp, textAlign = TextAlign.Center)
 
                         }
                     }

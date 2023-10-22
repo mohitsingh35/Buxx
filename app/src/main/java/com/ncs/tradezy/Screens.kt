@@ -66,21 +66,18 @@ fun HomeScreen(
             ItemContent(listOf( R.drawable.amg),"Mercedes AMG","Mercedes",9000,1692814763079,true,"")
         )
         val newList = items.sortedByDescending { it.time  }
-        val filter=ArrayList<EachAdResponse>()
-        for (i in 0 until res.item.size){
-            if (res.item[i].item?.sellerId!=FirebaseAuth.getInstance().currentUser?.uid){
-                filter.add(res.item[i])
-            }
-            else{
-                continue
-            }
-        }
+//        val filter=ArrayList<EachAdResponse>()
+//        for (i in 0 until res.item.size){
+//            if (res.item[i].item?.sellerId!=FirebaseAuth.getInstance().currentUser?.uid){
+//                filter.add(res.item[i])
+//            }
+//            else{
+//                continue
+//            }
+//        }
         setActionBar(screenName = "Home", image = R.drawable.ic_launcher_foreground,navController)
         Tabs(pagerState = pagerState, navController = navController)
         TabsContent(pagerState = pagerState,token,filteredList,navController)
-
-
-
     }
 }
 

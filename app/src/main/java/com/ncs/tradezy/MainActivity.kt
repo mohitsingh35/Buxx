@@ -49,6 +49,12 @@ import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.primary
 import com.ncs.tradezy.ui.theme.primaryTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 const val TOPIC = "/topics/myTopic2"
 
@@ -91,7 +97,9 @@ class MainActivity : ComponentActivity() {
             val currentuser = FirebaseAuth.getInstance().currentUser?.uid
             val res2 = viewModel2.res.value
             val res3=viewModel3.res.value
-            var filtereNotiList = ArrayList<NotificationContent>()
+//            var filtereNotiList = ArrayList<NotificationContent>()
+            var filtereNotiList = mutableListOf<NotificationContent>()
+
             var promoNoti=ArrayList<NotificationContent>()
             var value by remember {
                 mutableStateOf("")
@@ -110,13 +118,16 @@ class MainActivity : ComponentActivity() {
             for (i in 0 until res3.item.size){
                 promoNoti.add(res3.item[i])
             }
-            Log.d("promo",promoNoti.toString())
             var allNotiList=ArrayList<NotificationContent>()
-            for (i in 0 until res2.item.size){
-                if (res2.item[i].item?.receiverID==currentuser){
-                    filtereNotiList.add(res2.item[i])
-                }
-            }
+//            for (i in 0 until res2.item.size){
+//                if (res2.item[i].item?.receiverID==currentuser){
+//                    filtereNotiList.add(res2.item[i])
+//                }
+//            }
+
+
+            filtereNotiList.addAll(res2.item.filter { it.item?.receiverID == currentuser })
+
 
             val context= LocalContext.current
             if (promoNoti.isNotEmpty() || filtereNotiList.isNotEmpty()) {
@@ -126,31 +137,18 @@ class MainActivity : ComponentActivity() {
             var myallnoti: ArrayList<NotificationContent>
             val myallnoti1= allNotiList.sortedByDescending { it.item?.time }
             myallnoti= ArrayList(myallnoti1)
-            for (i in 0 until myallnoti.size) {
-                if (myallnoti[i].item?.read == "false") {
-                    noticount++
-                }
-                if (myallnoti[i].item?.msgread?.containsKey(currentuser)==false && myallnoti[i].item?.read == ""){
-                    noticount++
-                }
-                if (myallnoti[i].item?.msgread?.containsKey(currentuser)==true && myallnoti[i].item?.read == ""){
-                    if (myallnoti[i].item?.msgread?.getValue(currentuser!!)=="false"){
-                        noticount++
-                    }
-                }
-
+            noticount += myallnoti.count { notification ->
+                notification.item?.read == "false" ||
+                        (notification.item?.msgread?.get(currentuser) == "false" && notification.item?.read == "")
             }
+
             connectivityObserver= NetworkConnectivityObserver(LocalContext.current.applicationContext)
             val status by connectivityObserver.observe().collectAsState(initial = ConnectivityObserver.Status.Unavailable )
             val viewModel: ProfileActivityViewModel = hiltViewModel()
             val res=viewModel.res.value
-            var filteredList= ArrayList<RealTimeUserResponse>()
-                for (i in 0 until res.item.size){
-                    if (res.item[i].item?.userId== user){
-                        filteredList.add(res.item[i])
-                    }
-                }
 
+            var filteredList= ArrayList<RealTimeUserResponse>()
+            filteredList.addAll(res.item.filter { it.item?.userId == user })
 
             val pref = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             val uid=FirebaseAuth.getInstance().currentUser?.uid
@@ -158,6 +156,7 @@ class MainActivity : ComponentActivity() {
             editor.putString(KEY_VARIABLE, uid)
             editor.apply()
             primaryTheme {
+
                 if (status==ConnectivityObserver.Status.Available  && value=="false"){
                     if (filteredList.isEmpty()){
                         mainLoading()
@@ -216,6 +215,9 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+                if(status==ConnectivityObserver.Status.Available  && value==""){
+                    mainLoading()
+                }
                 if (status!=ConnectivityObserver.Status.Available){
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                         internet()
@@ -224,7 +226,6 @@ class MainActivity : ComponentActivity() {
                 if (value=="true"){
                     maintenance()
                 }
-                
             }
         }
     }

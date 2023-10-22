@@ -124,7 +124,6 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
             }
         }
         userMessages.addAll(latestMessagesMap.values)
-        Log.d("msgUser",userMessages.toString())
         for (i in 0 until userMessages.size) {
             if (userMessages[i].item?.receiverId == currentuser && userMessages[i].item?.read=="false") {
                 messagecount++

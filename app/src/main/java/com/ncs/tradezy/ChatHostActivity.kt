@@ -251,7 +251,7 @@ fun chatHost(name:String,id:String,fcmtoken:String,dp:String) {
         }
         if (showimageUpload){
 
-            showImageUpload()
+            imagesendLoading()
         }
         else{
             Box(
@@ -350,7 +350,6 @@ fun chatHost(name:String,id:String,fcmtoken:String,dp:String) {
                                 message.value = newText
                                 val maxLineLength = 25
                                 lineCount = (newText.length + maxLineLength - 1) / maxLineLength
-                                Log.d("linecount", lineCount.toString())
                             },
                             modifier = Modifier
                                 .fillMaxWidth(0.8f)

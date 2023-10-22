@@ -720,6 +720,8 @@ fun addImages(navController: NavController,viewModel: AddScreenViewModel = hiltV
 
                                                                         ResultState.Loading -> {
                                                                         }
+
+                                                                        else -> {}
                                                                     }
 
                                                                 }

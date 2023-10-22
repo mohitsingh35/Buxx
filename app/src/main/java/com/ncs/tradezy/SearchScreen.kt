@@ -2,6 +2,7 @@ package com.ncs.tradezy
 
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
@@ -23,6 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,43 +58,51 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.SemanticsProperties.ImeAction
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
 import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.betterWhite
 import com.ncs.tradezy.ui.theme.greenbg
 import kotlinx.coroutines.delay
 
+
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SearchScreen(navController1: NavController,viewModel:HomeScreenViewModel= hiltViewModel()){
 
-    val res=viewModel.res.value
-    val newList=ArrayList<EachAdResponse>()
-    for (i in 0 until res.item.size){
-        if (res.item[i].item?.sold!="true"){
-            newList.add(res.item[i])
-        }
-    }
-    val filterbyTrending=newList.sortedByDescending { it.item?.trendingViewCount?.toInt() }
-    val filterbyViews=newList.sortedByDescending { it.item?.viewCount?.toInt() }
-    val navController= rememberNavController()
+        val res=viewModel.res.value
+        val newList = res.item.filter { it.item?.sold != "true" }
+        val filterbyTrending = newList.sortedByDescending { it.item?.trendingViewCount?.toInt() }
+        val filterbyViews = newList.sortedByDescending { it.item?.viewCount?.toInt() }
+        val navController = rememberNavController()
 
-    Column(modifier = Modifier
-        .background(background)
-        .fillMaxSize()
-        .padding(top = 30.dp, start = 20.dp)){
-        NavigationSearchScreen(navController = navController, filterbyTrending = filterbyTrending, filterbyViews = filterbyViews )
-    }
+        Column(
+            modifier = Modifier
+                .background(background)
+                .fillMaxSize()
+                .padding(top = 30.dp)
+        ) {
+            NavigationSearchScreen(
+                navController = navController,
+                filterbyTrending = filterbyTrending,
+                filterbyViews = filterbyViews
+            )
+        }
+
 }
 
 
@@ -102,7 +113,7 @@ fun discoverarea(filterbyTrending: List<EachAdResponse>, filterbyViews:List<Each
         mutableStateOf("")
     }
     val context= LocalContext.current
-    Column {
+    Column (Modifier.padding(start = 20.dp)){
         Box(modifier = Modifier
             .padding(start = 10.dp)
             .clip(CircleShape)
@@ -179,7 +190,7 @@ fun discoverarea(filterbyTrending: List<EachAdResponse>, filterbyViews:List<Each
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun searcharea(navController: NavController) {
+fun searcharea(navController: NavController,viewModel: HomeScreenViewModel= hiltViewModel()) {
     var text by remember {
         mutableStateOf("")
     }
@@ -188,7 +199,13 @@ fun searcharea(navController: NavController) {
     var recentSearches by remember {
         mutableStateOf(sharedPreferencesManager.getRecentSearches().toList())
     }
-    val list= listOf("Drafter","LabCoat","Chemistry","Desk","Quantum","Chalks","Car")
+    val res=viewModel.res.value
+    val filter=ArrayList<List<String>>()
+    for (i in 0 until res.item.size){
+        filter.add(res.item[i].item?.tags!!)
+    }
+    val list1= filter.flatten()
+    val list=list1.distinct()
     var matchingWords by remember {
         mutableStateOf(list)
     }
@@ -206,7 +223,7 @@ fun searcharea(navController: NavController) {
         navController.navigate("discover")
     }
 
-    Column {
+    Column(Modifier.padding(start = 20.dp)) {
         Box(
             modifier = Modifier
                 .padding(start = 10.dp)
@@ -224,12 +241,11 @@ fun searcharea(navController: NavController) {
                 .fillMaxWidth()
                 .padding(end = 20.dp)
         ) {
-            // Capture user input and update text
             OutlinedTextField(
                 value = text,
                 onValueChange = {
                     text = it
-                    // You can update search suggestions based on the user's input here
+
                     matchingWords = list.filter { word ->
                         word.contains(text, ignoreCase = true)
                     }
@@ -241,6 +257,7 @@ fun searcharea(navController: NavController) {
                     onSearch = {
                         val search = text.trim()
                         if (search.isNotBlank()) {
+                            navController.navigate("searchResult/${search}")
                             sharedPreferencesManager.saveRecentSearch(search)
                             recentSearches = sharedPreferencesManager.getRecentSearches().toList()
                             text = ""
@@ -274,8 +291,18 @@ fun searcharea(navController: NavController) {
                         .padding(end = 30.dp)
                         .clickable {
                             text = word
+                            navController.navigate("searchResult/${text}")
+                            sharedPreferencesManager.saveRecentSearch(text)
+                            recentSearches = sharedPreferencesManager
+                                .getRecentSearches()
+                                .toList()
+                            text = ""
+
                         }){
-                        Row(Modifier.fillMaxHeight().fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row(
+                            Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = word,
@@ -324,8 +351,12 @@ fun searcharea(navController: NavController) {
                         .padding(end = 30.dp)
                         .clickable {
                             text = search
+                            navController.navigate("searchResult/${text}")
                         }){
-                        Row(Modifier.fillMaxHeight().fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row(
+                            Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
                                 Image(painter = painterResource(id = R.drawable.recent), contentDescription = "",Modifier.size(25.dp) )
                                 Text(
@@ -428,4 +459,68 @@ fun eachAd(item:EachAdResponse) {
         }
     }
     Spacer(modifier = Modifier.width(10.dp))
+}
+@Composable
+fun searchResult(navController: NavController,viewModel: HomeScreenViewModel= hiltViewModel(),searchedtext:String){
+
+    val currentuser=FirebaseAuth.getInstance().currentUser?.uid
+    val res=viewModel.res.value
+    val list=ArrayList<EachAdResponse>()
+    for (i in 0 until res.item.size){
+        if (res.item[i].item?.sellerId!=currentuser){
+            list.add(res.item[i])
+        }
+    }
+    val finalList=list.filter { it.item?.tags!!.contains(searchedtext) }
+    Column {
+        Box(
+            modifier = Modifier
+                .padding(start = 30.dp)
+                .clip(CircleShape)
+                .clickable {
+                    navController.navigate("discover")
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        val gridHeight: Dp
+        val totalItems = finalList.size
+        if (totalItems % 2 != 0) {
+            gridHeight = with(LocalDensity.current) {
+                val gridHeightDp = (totalItems + 1) / 2 * 300.dp
+                gridHeightDp.toPx().coerceAtLeast(1f).toDp()
+            }
+        } else {
+            gridHeight = with(LocalDensity.current) {
+                val gridHeightDp = totalItems / 2 * 300.dp
+                gridHeightDp.toPx().coerceAtLeast(1f).toDp()
+            }
+        }
+        if (finalList.isNotEmpty()) {
+            LazyColumn(Modifier.padding(end = 2.dp, start = 2.dp)) {
+                item {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        userScrollEnabled = false,
+                        modifier = Modifier.height(gridHeight),
+                        content = {
+                            items(finalList.size) { index ->
+                                eachItem(
+                                    item = finalList[index],
+                                    index = index,
+                                    onItemClick = {
+
+                                    })
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        else{
+            emptyscreen()
+        }
+    }
 }

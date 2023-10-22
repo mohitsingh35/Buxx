@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.ncs.marketplace.googleAuth.GoogleAuthUIClient
 import com.ncs.tradezy.repository.RealTimeUserResponse
 
@@ -64,6 +66,13 @@ fun NavigationSearchScreen(
         }
         composable("search"){
             searcharea(navController)
+        }
+        composable(
+            route = "searchResult/{searchedText}",
+            arguments = listOf(navArgument("searchedText") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val text = backStackEntry.arguments?.getString("searchedText") ?: ""
+            searchResult(navController, searchedtext =  text)
         }
     }
 }

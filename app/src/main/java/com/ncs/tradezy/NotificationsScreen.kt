@@ -85,7 +85,6 @@ fun notificationsScreen(viewModel: NotificationViewModel= hiltViewModel(), viewM
     for (i in 0 until res3.item.size){
         promoNoti.add(res3.item[i])
     }
-    Log.d("promo",promoNoti.toString())
     val currentuser=FirebaseAuth.getInstance().currentUser?.uid
     var filtereNotiList=ArrayList<NotificationContent>()
     var allNotiList=ArrayList<NotificationContent>()
