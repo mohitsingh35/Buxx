@@ -212,7 +212,7 @@ fun eachRow(message:String,isRead:Boolean,viewModel2: ProfileActivityViewModel= 
                         Text(text = sender[0].item?.name!!, fontWeight = if (!isRead) FontWeight.Bold else FontWeight.Normal, fontSize = 18.sp, color = Color.Black)
                         Spacer(modifier = Modifier.width(15.dp))
                         Row() {
-                            Icon(imageVector = Icons.Filled.Face, contentDescription = "", tint = Color.Gray)
+                            Icon(painter = painterResource(id = R.drawable.galleryicon), contentDescription = "", tint = Color.Gray, modifier = Modifier.size(20.dp))
                             Box(Modifier.padding(3.dp)) {
                                 Text(text = "Photo", fontWeight = if (!isRead) FontWeight.Bold else FontWeight.Normal, fontSize = 13.sp, maxLines = 1, color = Color.Gray)
                             }

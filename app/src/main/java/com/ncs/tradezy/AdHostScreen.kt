@@ -3,12 +3,12 @@ package com.ncs.tradezy
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,15 +29,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -58,45 +54,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.AndroidViewModel
-import androidx.work.BackoffPolicy
-import androidx.work.Constraints
-import androidx.work.Data
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import com.ncs.tradezy.repository.RealTimeUserResponse
 import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.betterWhite
 import com.ncs.tradezy.ui.theme.main
-import com.ncs.tradezy.ui.theme.primary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel(),
            viewModel3:AddScreenViewModel= hiltViewModel(),viewModel4:HomeScreenViewModel= hiltViewModel(),
-           viewModel5:ChatViewModel= hiltViewModel()){
+           viewModel5:ChatViewModel= hiltViewModel(),onClick:(String)->Unit){
     val scope= rememberCoroutineScope()
     val context= LocalContext.current
     val sheetState = rememberModalBottomSheetState()
@@ -121,6 +105,19 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
     }
     var showmsgsentDialog by remember {
         mutableStateOf(false)
+    }
+    val currentuser = FirebaseAuth.getInstance().currentUser?.uid
+    var userList=ArrayList<String>()
+    var isUserinDB by remember {
+        mutableStateOf(false)
+    }
+    val profiles: ProfileActivityViewModel = hiltViewModel()
+    val profilesres=profiles.res.value
+    for (i in 0 until profilesres.item.size){
+        userList.add(profilesres.item[i].item?.userId!!)
+    }
+    if (userList.contains(currentuser)){
+        isUserinDB=true
     }
     val res4=viewModel4.res.value
     var item:EachAdResponse=item1
@@ -862,9 +859,32 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
         var sendexcreq by remember {
             mutableStateOf(false)
         }
+        var sendwhatsapp by remember {
+            mutableStateOf(false)
+        }
         var exccovermessage by remember {
             mutableStateOf("Hi, I am willing to offer exchange for your product : ${item.item?.title}, I want to exchange these items for your product... \n\nLooking for a positive response from your side!")
         }
+//        if (sendwhatsapp){
+//            val mobileNumber: String = item.item!!.whatsappNum!!
+//            val message: String = exccovermessage
+//            val installed = appInstalledOrNot("com.whatsapp",context)
+//            if (installed) {
+//                val intent = Intent(Intent.ACTION_VIEW)
+//                intent.data =
+//                    Uri.parse("http://api.whatsapp.com/send?phone=+91$mobileNumber&text=$message")
+//                context.startActivity(intent)
+//            } else {
+//                Toast.makeText(
+//                    context,
+//                    "Whats app not installed on your device",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            }
+//
+//
+//        }
+
         if (sendexcreq){
             sendexcreq=false
             sendNotification(PushNotification(NotificationData(title,message),seller?.fcmToken!!))
@@ -1068,108 +1088,143 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
             }
         }
         if (showexchangesheet){
+
             ModalBottomSheet(
                 onDismissRequest = {
                     showexchangesheet = false
                 },
                 sheetState = sheetState
             ){
-
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.7f)
-                        .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Send a cover message!",
-                            color = Color.Black,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 25.sp
-                        )
-                        Spacer(modifier = Modifier.height(5.dp))
-                        Text(
-                            text = "Offers with great cover messages are more likely to get accepted. \n tell about the items you want to exchange",
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 10.sp,
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(30.dp))
-                        OutlinedTextField(
-                            value = exccovermessage,
-                            onValueChange = {
-                                if (it.length <= 300) {
-                                    exccovermessage = it
-                                }
-                            },
-                            label = {
-                                Text(text = "Cover Message")
-                            },
-                            shape = RoundedCornerShape(15.dp),
-                            maxLines = 6,
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedLabelColor = Color.Black, focusedLeadingIconColor = Color.Black,focusedBorderColor = Color.Black, focusedTextColor = Color.Black, cursorColor = Color.Black, unfocusedLabelColor = Color.Gray, unfocusedBorderColor = Color.Gray, unfocusedLeadingIconColor = Color.Gray
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Box(modifier = Modifier
+                if (isUserinDB) {
+                    Column(
+                        Modifier
                             .fillMaxWidth()
-                            .padding(end = 20.dp), contentAlignment = Alignment.TopEnd){
+                            .fillMaxHeight(0.7f)
+                            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "${exccovermessage.length}/300 ",
-                                color = if (exccovermessage.length > 300) Color.Red else Color.Gray,
-                                modifier = Modifier.padding(start = 16.dp), fontWeight = FontWeight.Thin, fontSize = 16.sp
+                                text = "Send a cover message!",
+                                color = Color.Black,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 25.sp
                             )
-                        }
-                        Spacer(modifier = Modifier.height(30.dp))
-                        Box(Modifier
-                            .fillMaxWidth(1f)
-                            .height(50.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable {
-                                sendexcreq = true
+                            Spacer(modifier = Modifier.height(5.dp))
+                            Text(
+                                text = "Offers with great cover messages are more likely to get accepted. \n tell about the items you want to exchange",
+                                color = Color.Gray,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 10.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(30.dp))
+                            OutlinedTextField(
+                                value = exccovermessage,
+                                onValueChange = {
+                                    if (it.length <= 300) {
+                                        exccovermessage = it
+                                    }
+                                },
+                                label = {
+                                    Text(text = "Cover Message")
+                                },
+                                shape = RoundedCornerShape(15.dp),
+                                maxLines = 6,
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedLabelColor = Color.Black,
+                                    focusedLeadingIconColor = Color.Black,
+                                    focusedBorderColor = Color.Black,
+                                    focusedTextColor = Color.Black,
+                                    cursorColor = Color.Black,
+                                    unfocusedLabelColor = Color.Gray,
+                                    unfocusedBorderColor = Color.Gray,
+                                    unfocusedLeadingIconColor = Color.Gray
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 20.dp), contentAlignment = Alignment.TopEnd
+                            ) {
+                                Text(
+                                    text = "${exccovermessage.length}/300 ",
+                                    color = if (exccovermessage.length > 300) Color.Red else Color.Gray,
+                                    modifier = Modifier.padding(start = 16.dp),
+                                    fontWeight = FontWeight.Thin,
+                                    fontSize = 16.sp
+                                )
                             }
-                            .background(main), contentAlignment = Alignment.Center) {
-                            Row {
-                                Box(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "Send the Offer!",
-                                        color = Color.Black,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                            }
-                        }
-                        if (item.item?.whatsapp=="true") {
-                            Spacer(modifier = Modifier.height(15.dp))
+                            Spacer(modifier = Modifier.height(30.dp))
                             Box(Modifier
                                 .fillMaxWidth(1f)
                                 .height(50.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .clickable {
-
+                                    sendexcreq = true
                                 }
                                 .background(main), contentAlignment = Alignment.Center) {
-                                Row (Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically){
+                                Row {
+                                    Box(
+                                        modifier = Modifier.fillMaxHeight(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "Send the Offer!",
+                                            color = Color.Black,
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
+                            }
+                            if (item.item?.whatsapp == "true") {
+                                Spacer(modifier = Modifier.height(15.dp))
+                                Box(Modifier
+                                    .fillMaxWidth(1f)
+                                    .height(50.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .clickable {
+                                        onClick(exccovermessage)
+                                    }
+                                    .background(main), contentAlignment = Alignment.Center) {
+                                    Row(
+                                        Modifier.fillMaxHeight(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
 
-                                    Text(
-                                        text = "Send the Offer with",
-                                        color = Color.Black,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Image(painter = painterResource(id = R.drawable.whatsapp), modifier = Modifier.size(30.dp), contentDescription = "")
+                                        Text(
+                                            text = "Send the Offer with",
+                                            color = Color.Black,
+                                            textAlign = TextAlign.Center
+                                        )
+                                        Spacer(modifier = Modifier.width(10.dp))
+                                        Image(
+                                            painter = painterResource(id = R.drawable.whatsapp),
+                                            modifier = Modifier.size(30.dp),
+                                            contentDescription = ""
+                                        )
 
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+                else{
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.4f)
+                            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                    ){
+                        Text(
+                            text = "Complete Your Profile first",
+                            color = Color.Black,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 25.sp
+                        )
                     }
                 }
             }
@@ -1182,7 +1237,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                 },
                 sheetState = sheetState
             ) {
-                if (offerscreen && !showcover) {
+                if (offerscreen && !showcover &&isUserinDB) {
                     Column(
                         Modifier
                             .fillMaxWidth()
@@ -1215,7 +1270,9 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                         RoundedCornerShape(10.dp)
                                     )
                                     .clickable {
-                                        price = price!! - 10
+                                        if (price!! > 10) {
+                                            price = price!! - 10
+                                        }
                                     }
                                     .background(Color.LightGray),
                                     contentAlignment = Alignment.Center) {
@@ -1351,7 +1408,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         }
                     }
                 }
-                if (showcover && !offerscreen){
+                if (showcover && !offerscreen && isUserinDB){
                     Column(
                         Modifier
                             .fillMaxWidth()
@@ -1449,6 +1506,24 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                             }
                         }
                     }
+
+                }
+                if (!isUserinDB){
+
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.4f)
+                            .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center
+                    ){
+                        Text(
+                            text = "Complete Your Profile first",
+                            color = Color.Black,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 25.sp
+                        )
+                    }
+
                 }
             }
         }
@@ -1487,4 +1562,15 @@ private fun sendNotification(notification: PushNotification) = CoroutineScope(Di
     } catch(e: Exception) {
         Log.e(TAG, e.toString())
     }
+}
+private fun appInstalledOrNot(url: String,context: Context): Boolean {
+    val packageManager: PackageManager = context.packageManager
+    val app_installed: Boolean
+    app_installed = try {
+        packageManager.getPackageInfo(url, PackageManager.GET_ACTIVITIES)
+        true
+    } catch (e: PackageManager.NameNotFoundException) {
+        false
+    }
+    return app_installed
 }

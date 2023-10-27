@@ -3,6 +3,10 @@ package com.ncs.tradezy.googleAuth
 import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -135,6 +139,7 @@ fun about3(
 }
 @Composable
 fun splash(navController: NavController,isSigned:Boolean){
+    var visibility by remember { mutableStateOf(false) }
     if (!isSigned){
         LaunchedEffect(key1 = true){
             delay(3000L)
@@ -149,13 +154,13 @@ fun splash(navController: NavController,isSigned:Boolean){
             context.startActivity(Intent(context, MainActivity::class.java))
         }
     }
-
     Box(modifier = Modifier
         .fillMaxSize()
-        .background(main), contentAlignment = Alignment.Center){
-        Text(text = "Splash Screen", fontSize = 40.sp)
+        .background(background), contentAlignment = Alignment.Center){
+        Image(painter = painterResource(id = R.drawable.applogo), contentDescription = "", modifier = Modifier.size(200.dp))
 
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -182,7 +182,7 @@ fun eachItem(
                                                 main
                                             ), contentAlignment = Alignment.Center
                                     ) {
-                                        Row(Modifier.padding(start = 7.dp, end = 7.dp)) {
+                                        Row(Modifier.padding(start = 3.dp, end = 3.dp)) {
                                             Icon(
                                                 imageVector = Icons.Filled.LocationOn,
                                                 contentDescription = "",

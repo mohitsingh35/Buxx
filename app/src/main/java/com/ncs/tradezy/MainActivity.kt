@@ -95,6 +95,18 @@ class MainActivity : ComponentActivity() {
             val viewModel2: NotificationViewModel= hiltViewModel()
             val viewModel3: PromoNotificationViewModel= hiltViewModel()
             val currentuser = FirebaseAuth.getInstance().currentUser?.uid
+            var userList=ArrayList<String>()
+            var isUserinDB by remember {
+                mutableStateOf(false)
+            }
+            val profiles: ProfileActivityViewModel = hiltViewModel()
+            val profilesres=profiles.res.value
+            for (i in 0 until profilesres.item.size){
+                userList.add(profilesres.item[i].item?.userId!!)
+            }
+            if (userList.contains(googleAuthUiClient.getSignedInUser()?.userID)){
+                isUserinDB=true
+            }
             val res2 = viewModel2.res.value
             val res3=viewModel3.res.value
 //            var filtereNotiList = ArrayList<NotificationContent>()
@@ -148,7 +160,12 @@ class MainActivity : ComponentActivity() {
             val res=viewModel.res.value
 
             var filteredList= ArrayList<RealTimeUserResponse>()
-            filteredList.addAll(res.item.filter { it.item?.userId == user })
+            if (isUserinDB) {
+                filteredList.addAll(res.item.filter { it.item?.userId == user })
+            }
+            else{
+                filteredList.addAll(res.item)
+            }
 
             val pref = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             val uid=FirebaseAuth.getInstance().currentUser?.uid

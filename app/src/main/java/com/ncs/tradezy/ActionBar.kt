@@ -84,7 +84,9 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
     var messagecount=0
     val currentuser = FirebaseAuth.getInstance().currentUser?.uid
     var current = ArrayList<RealTimeUserResponse>()
-
+    var notinDB by remember {
+        mutableStateOf(false)
+    }
     if (user.item.isNotEmpty()) {
         for (i in 0 until user.item.size) {
             if (user.item[i].item?.userId == currentuser) {
@@ -147,17 +149,36 @@ fun setActionBar(screenName:String, image: Int,navController: NavController,view
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Box(Modifier.padding(15.dp)) {
-
-
+                        if (current.isNotEmpty()){
                             Text(
                                 text =if (user.item.isEmpty()) "Welcome" else "Hi, ${current[0].item?.name?.substringBefore(" ")}" ,
                                 color = Color.Black,
                                 fontSize = 25.sp,
                                 fontWeight = FontWeight.Medium
                             )
+                        }
+                        else{
+                            Text(
+                                text ="Welcome" ,
+                                color = Color.Black,
+                                fontSize = 25.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                     Row {
-                        Box(Modifier.fillMaxHeight().padding(end = 25.dp, top = 10.dp).clickable { context.startActivity(Intent(context,ChatActivity::class.java)) }){
+                        Box(
+                            Modifier
+                                .fillMaxHeight()
+                                .padding(end = 25.dp, top = 10.dp)
+                                .clickable {
+                                    context.startActivity(
+                                        Intent(
+                                            context,
+                                            ChatActivity::class.java
+                                        )
+                                    )
+                                }){
                             Box(Modifier.padding(top = 5.dp)) {
                                 Icon(painter = painterResource(R.drawable.msg_icon),
                                     contentDescription = "",

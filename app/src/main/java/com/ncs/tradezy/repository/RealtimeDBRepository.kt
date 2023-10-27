@@ -47,7 +47,7 @@ class RealtimeDBRepository @Inject constructor(
                             val itemRef = db.child("Ads").push()
                             itemRef.setValue(item)
                             itemRef.child("images").setValue(imageUrls)
-                            trySend(ResultState.Success("Inserted Successfully"))
+                            trySend(ResultState.Success("Posted Successfully"))
                             close()
                         }
                     }
@@ -272,7 +272,7 @@ class RealtimeDBRepository @Inject constructor(
                 item
             ).addOnCompleteListener {
                 if(it.isSuccessful)
-                    trySend(ResultState.Success("Successfully"))
+                    trySend(ResultState.Success("Welcome"))
             }.addOnFailureListener {
                 trySend(ResultState.Failure(it))
             }
@@ -335,7 +335,7 @@ class RealtimeDBRepository @Inject constructor(
                 item
             ).addOnCompleteListener {
                 if(it.isSuccessful)
-                    trySend(ResultState.Success("Successfully"))
+                    trySend(ResultState.Success(""))
             }.addOnFailureListener {
                 trySend(ResultState.Failure(it))
             }
@@ -359,7 +359,7 @@ class RealtimeDBRepository @Inject constructor(
                             val itemRef = db.child("messages").push()
                             itemRef.setValue(otherdetails)
                             itemRef.child("images").setValue(imageUrls)
-                            trySend(ResultState.Success("Inserted Successfully"))
+                            trySend(ResultState.Success("Sent Successfully"))
                             close()
                         }
                     }
@@ -410,7 +410,7 @@ class RealtimeDBRepository @Inject constructor(
         db.child("messages").child(res.key!!).updateChildren(
             map
         ).addOnCompleteListener{
-            trySend(ResultState.Success("Updated Successfully"))
+            trySend(ResultState.Success(""))
         }
             .addOnFailureListener {
                 trySend(ResultState.Failure(it))

@@ -21,9 +21,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,13 +36,19 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.ncs.tradezy.networkObserver.ConnectivityObserver
 import com.ncs.tradezy.networkObserver.NetworkConnectivityObserver
 import com.ncs.tradezy.repository.RealTimeUserResponse
@@ -46,7 +56,11 @@ import com.ncs.tradezy.ui.theme.background
 import com.ncs.tradezy.ui.theme.betterWhite
 import com.ncs.tradezy.ui.theme.main
 import com.ncs.tradezy.ui.theme.primary
+import retrofit2.http.Url
 
+val path=FirebaseDatabase.getInstance().reference.child("data").child("promotionalimages")
+
+val imageURLs=ArrayList<String>()
 
 @Composable
 fun AllItems(
@@ -57,11 +71,27 @@ fun AllItems(
     navController: NavController
 ){
 
-    
-        if (token!="" && (filteredList.isNotEmpty())){
+    var imageUrlsPopulated by remember { mutableStateOf(false) }
+
+    if (token!="" && (filteredList.isNotEmpty())){
             updatefcmToken(itemState = filteredList[0] , viewModel = viewModel2, newToken = token)
         }
-
+        path.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val imageList = mutableListOf<String>()
+                for (childSnapshot in dataSnapshot.children) {
+                    val stringValue = childSnapshot.getValue(String::class.java)
+                    stringValue?.let {
+                        imageList.add(it)
+                    }
+                }
+                imageURLs.addAll(imageList)
+                imageUrlsPopulated=true
+            }
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("Firebase", "Error fetching data", databaseError.toException())
+            }
+        })
         Column(modifier = Modifier
             .background(background)
             .fillMaxSize()){
@@ -114,10 +144,22 @@ fun AllItems(
                         }
                         LazyColumn() {
                             item {
-                                LazyRow(Modifier.padding(start = 5.dp)) {
-                                    items(3) {
-                                        slider()
+                                if (imageUrlsPopulated) {
+                                    LazyRow(Modifier.padding(start = 5.dp)) {
+                                        items(1) {
+                                            for (i in 0 until 3) {
+                                                slider(imageUrl = imageURLs[i])
+                                            }
+                                        }
                                     }
+                                }
+                                else {
+                                    LazyRow(Modifier.padding(start = 5.dp)) {
+                                        items(3) {
+                                            defaultslider()
+                                        }
+                                    }
+
                                 }
                                 Spacer(modifier = Modifier.height(10.dp))
                                 LazyVerticalGrid(
@@ -146,15 +188,34 @@ fun AllItems(
 }
 
 @Composable
-fun slider(){
+fun slider(imageUrl: String){
+    Box(modifier = Modifier
+        .width(350.dp)
+        .height(150.dp)
+        .clip(RoundedCornerShape(15.dp))
+        .background(background)
+        , contentAlignment = Alignment.Center
+        ){
+        AsyncImage(model = imageUrl, contentDescription = "", contentScale = ContentScale.Crop,modifier = Modifier
+            .width(350.dp)
+            .height(150.dp)
+            .clip(RoundedCornerShape(15.dp)))
+    }
+    Spacer(modifier = Modifier.width(5.dp))
+}
+@Composable
+fun defaultslider(){
     Box(modifier = Modifier
         .width(350.dp)
         .height(150.dp)
         .clip(RoundedCornerShape(15.dp))
         .background(Color.Black)
         , contentAlignment = Alignment.Center
-        ){
-        Text(text = "Promotional slider content", color = betterWhite)
+    ){
+        Image(painter = painterResource(id = R.drawable.placeholder), contentDescription = "", contentScale = ContentScale.Crop,modifier = Modifier
+            .width(350.dp)
+            .height(150.dp)
+            .clip(RoundedCornerShape(15.dp)))
     }
     Spacer(modifier = Modifier.width(5.dp))
 }
@@ -164,6 +225,23 @@ fun BuyOnly(
     viewModel: HomeScreenViewModel= hiltViewModel(),
     viewModel2: ProfileActivityViewModel= hiltViewModel(),
 ){
+    var imageUrlsPopulated by remember { mutableStateOf(false) }
+    path.addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val imageList = mutableListOf<String>()
+            for (childSnapshot in dataSnapshot.children) {
+                val stringValue = childSnapshot.getValue(String::class.java)
+                stringValue?.let {
+                    imageList.add(it)
+                }
+            }
+            imageURLs.addAll(imageList)
+            imageUrlsPopulated=true
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.e("Firebase", "Error fetching data", databaseError.toException())
+        }
+    })
     Column(modifier = Modifier
         .background(background)
         .fillMaxSize()){
@@ -217,10 +295,22 @@ fun BuyOnly(
                     }
                     LazyColumn() {
                         item {
-                            LazyRow(Modifier.padding(start = 5.dp)) {
-                                items(3) {
-                                    slider()
+                            if (imageUrlsPopulated) {
+                                LazyRow(Modifier.padding(start = 5.dp)) {
+                                    items(1) {
+                                        for (i in 0 until 3) {
+                                            slider(imageUrl = imageURLs[i])
+                                        }
+                                    }
                                 }
+                            }
+                            else {
+                                LazyRow(Modifier.padding(start = 5.dp)) {
+                                    items(3) {
+                                        defaultslider()
+                                    }
+                                }
+
                             }
                             Spacer(modifier = Modifier.height(10.dp))
                             LazyVerticalGrid(
@@ -251,6 +341,24 @@ fun Exchange(
     viewModel: HomeScreenViewModel= hiltViewModel(),
     viewModel2: ProfileActivityViewModel= hiltViewModel(),
 ){
+    var imageUrlsPopulated by remember { mutableStateOf(false) }
+
+    path.addValueEventListener(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val imageList = mutableListOf<String>()
+            for (childSnapshot in dataSnapshot.children) {
+                val stringValue = childSnapshot.getValue(String::class.java)
+                stringValue?.let {
+                    imageList.add(it)
+                }
+            }
+            imageURLs.addAll(imageList)
+            imageUrlsPopulated=true
+        }
+        override fun onCancelled(databaseError: DatabaseError) {
+            Log.e("Firebase", "Error fetching data", databaseError.toException())
+        }
+    })
     Column(modifier = Modifier
         .background(background)
         .fillMaxSize()){
@@ -305,10 +413,22 @@ fun Exchange(
                     }
                     LazyColumn() {
                         item {
-                            LazyRow(Modifier.padding(start = 5.dp)) {
-                                items(3) {
-                                    slider()
+                            if (imageUrlsPopulated) {
+                                LazyRow(Modifier.padding(start = 5.dp)) {
+                                    items(1) {
+                                        for (i in 0 until 3) {
+                                            slider(imageUrl = imageURLs[i])
+                                        }
+                                    }
                                 }
+                            }
+                            else {
+                                LazyRow(Modifier.padding(start = 5.dp)) {
+                                    items(3) {
+                                        defaultslider()
+                                    }
+                                }
+
                             }
                             Spacer(modifier = Modifier.height(10.dp))
                             LazyVerticalGrid(
