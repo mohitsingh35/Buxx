@@ -455,6 +455,7 @@ fun messageSender(itemState: MessageResponse) {
                             AsyncImage(
                                 model = itemState.item.ad.item?.images?.get(0),
                                 contentDescription = "",
+                                modifier = Modifier.clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomEnd = 15.dp, bottomStart = 15.dp)),
                                 contentScale = ContentScale.Crop
                             )
                             Text(text = itemState.item.ad.item?.title!!)
@@ -689,6 +690,7 @@ fun MessageReceiver(itemState: MessageResponse,viewModel: ChatViewModel= hiltVie
                             AsyncImage(
                                 model = itemState.item.ad.item?.images?.get(0),
                                 contentDescription = "",
+                                modifier = Modifier.clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomEnd = 15.dp, bottomStart = 15.dp)),
                                 contentScale = ContentScale.Crop
                             )
                             Text(text = itemState.item.ad.item?.title!!)

@@ -16,6 +16,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -75,7 +77,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewModel(),viewModel2: NotificationViewModel= hiltViewModel(),
@@ -468,7 +470,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(50.dp)
+                                .height(80.dp)
                                 .padding(start = 20.dp, top = 20.dp, end = 20.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
@@ -499,6 +501,12 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
 
                         }
                         Spacer(modifier = Modifier.height(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .height(10.dp)
+                                .width(500.dp)
+                                .background(Color.LightGray)
+                        )
                         Box(modifier = Modifier.padding(start = 20.dp, top = 10.dp, end = 20.dp)) {
                             Text(
                                 text = "Title",
@@ -513,7 +521,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         Spacer(modifier = Modifier.height(15.dp))
                         Box(
                             modifier = Modifier
-                                .height(1.dp)
+                                .height(10.dp)
                                 .width(500.dp)
                                 .background(Color.LightGray)
                         )
@@ -537,7 +545,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         Spacer(modifier = Modifier.height(25.dp))
                         Box(
                             modifier = Modifier
-                                .height(1.dp)
+                                .height(10.dp)
                                 .width(500.dp)
                                 .background(Color.LightGray)
                         )
@@ -558,22 +566,29 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                                 )
                             }
                             Row(
-                                modifier = Modifier.padding(
-                                    start = 20.dp,
-                                    top = 10.dp,
-                                    end = 20.dp
-                                )
+                                modifier = Modifier
+                                    .padding(
+                                        start = 20.dp,
+                                        top = 10.dp,
+                                        end = 20.dp
+                                    )
+                                    .fillMaxWidth()
                             ) {
-                                for (i in 0 until item.item?.tags?.size!!) {
-                                    eachtag(tag = item.item?.tags!![i]!!)
-                                    Spacer(modifier = Modifier.width(5.dp))
+                                FlowRow(
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp),
+                                    verticalArrangement = Arrangement.Top,
+                                    horizontalArrangement = Arrangement.Start,
+                                ) {
+                                    for (i in 0 until item.item?.tags?.size!!) {
+                                        eachtag(tag = item.item?.tags!![i]!!)
+                                    }
                                 }
 
                             }
                             Spacer(modifier = Modifier.height(25.dp))
                             Box(
                                 modifier = Modifier
-                                    .height(1.dp)
+                                    .height(10.dp)
                                     .width(500.dp)
                                     .background(Color.LightGray)
                             )
@@ -607,7 +622,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         Spacer(modifier = Modifier.height(15.dp))
                         Box(
                             modifier = Modifier
-                                .height(1.dp)
+                                .height(10.dp)
                                 .width(500.dp)
                                 .background(Color.LightGray)
                         )
@@ -656,7 +671,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
                         Spacer(modifier = Modifier.height(15.dp))
                         Box(
                             modifier = Modifier
-                                .height(1.dp)
+                                .height(10.dp)
                                 .width(500.dp)
                                 .background(Color.LightGray)
                         )
@@ -1537,6 +1552,7 @@ fun adHost(item1:EachAdResponse,viewModel: ProfileActivityViewModel= hiltViewMod
 @Composable
 fun eachtag(tag:String){
     Box(modifier = Modifier
+        .padding(5.dp)
         .clip(RoundedCornerShape(10.dp))
         .background(main), contentAlignment = Alignment.Center){
         Row(Modifier.padding(10.dp)) {

@@ -133,12 +133,12 @@ fun AllItems(
                         val totalItems = filter.size
                         if (totalItems % 2 != 0) {
                             gridHeight = with(LocalDensity.current) {
-                                val gridHeightDp = (totalItems + 1) / 2 * 300.dp
+                                val gridHeightDp = (totalItems + 1) / 2 * 350.dp
                                 gridHeightDp.toPx().coerceAtLeast(1f).toDp()
                             }
                         } else {
                             gridHeight = with(LocalDensity.current) {
-                                val gridHeightDp = totalItems / 2 * 300.dp
+                                val gridHeightDp = totalItems / 2 * 350.dp
                                 gridHeightDp.toPx().coerceAtLeast(1f).toDp()
                             }
                         }
@@ -147,7 +147,7 @@ fun AllItems(
                                 if (imageUrlsPopulated) {
                                     LazyRow(Modifier.padding(start = 5.dp)) {
                                         items(1) {
-                                            for (i in 0 until 3) {
+                                            for (i in 0 until 2) {
                                                 slider(imageUrl = imageURLs[i])
                                             }
                                         }
@@ -155,7 +155,7 @@ fun AllItems(
                                 }
                                 else {
                                     LazyRow(Modifier.padding(start = 5.dp)) {
-                                        items(3) {
+                                        items(2) {
                                             defaultslider()
                                         }
                                     }
@@ -284,12 +284,12 @@ fun BuyOnly(
                     val totalItems = filter.size
                     if (totalItems % 2 != 0) {
                         gridHeight = with(LocalDensity.current) {
-                            val gridHeightDp = (totalItems + 1) / 2 * 300.dp
+                            val gridHeightDp = (totalItems + 1) / 2 * 330.dp
                             gridHeightDp.toPx().coerceAtLeast(1f).toDp()
                         }
                     } else {
                         gridHeight = with(LocalDensity.current) {
-                            val gridHeightDp = totalItems / 2 * 300.dp
+                            val gridHeightDp = totalItems / 2 * 330.dp
                             gridHeightDp.toPx().coerceAtLeast(1f).toDp()
                         }
                     }

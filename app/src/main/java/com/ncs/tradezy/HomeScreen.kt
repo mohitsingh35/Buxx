@@ -77,7 +77,7 @@ fun eachItem(
     val context = LocalContext.current
     Card(
         modifier = Modifier
-            .height(290.dp)
+            .height(305.dp)
             .padding(3.dp)
             .fillMaxWidth(1f),
         shape = RoundedCornerShape(15.dp),
@@ -133,7 +133,7 @@ fun eachItem(
                     intent.putExtra("clickedItem", item)
                     context.startActivity(intent)
                 }
-                .height(300.dp)
+                .height(320.dp)
             ) {
                 Column(
                     Modifier
@@ -141,20 +141,19 @@ fun eachItem(
                         .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                        LazyRow(
+                        Box(
                             Modifier
                                 .height(200.dp)
+                                .fillMaxWidth()
                                 .padding(7.dp)
                         ) {
-                            items(item.item?.images?.size!!) { index ->
-                                AsyncImage(
-                                    model = item.item.images[index],
-                                    contentDescription = " ",
-                                    modifier = Modifier
-                                        .height(200.dp).clip(RoundedCornerShape(15.dp)).width(160.dp),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
+                            AsyncImage(
+                                model = item.item?.images?.get(0),
+                                contentDescription = " ",
+                                modifier = Modifier
+                                    .height(200.dp).clip(RoundedCornerShape(15.dp)).fillMaxWidth(),
+                                contentScale = ContentScale.Crop
+                            )
                         }
                     Row(Modifier.fillMaxWidth()) {
                         Column(Modifier.fillMaxWidth(1f)) {

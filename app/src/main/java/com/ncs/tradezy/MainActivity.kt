@@ -2,6 +2,8 @@ package com.ncs.tradezy
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 import androidx.navigation.compose.rememberNavController
-import com.bitpolarity.bitscuit.Bitscuit
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.google.android.gms.auth.api.identity.Identity
@@ -66,12 +67,14 @@ class MainActivity : ComponentActivity() {
     private lateinit var connectivityObserver: ConnectivityObserver
     private var backPressedCount by mutableStateOf(0L)
     private var backPressedToast: Toast? = null
+    var updater:AppConfigUpdater?=null
     private val googleAuthUiClient by lazy {
         GoogleAuthUIClient(
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
+
 
     val user=FirebaseAuth.getInstance().currentUser?.uid
     @OptIn(ExperimentalPagerApi::class)
@@ -116,6 +119,9 @@ class MainActivity : ComponentActivity() {
             var value by remember {
                 mutableStateOf("")
             }
+            var versionName by remember {
+                mutableStateOf("")
+            }
             val databaseReference = FirebaseDatabase.getInstance().reference.child("data").child("maintenance")
             databaseReference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -127,6 +133,21 @@ class MainActivity : ComponentActivity() {
                 override fun onCancelled(databaseError: DatabaseError) {
                 }
             })
+            FirebaseDatabase.getInstance().reference.child("data").child("UpdateAvailable").addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    for (snapshot in dataSnapshot.children) {
+                        val key = snapshot.key
+                        versionName = snapshot.getValue(String::class.java).toString()
+                    }
+                }
+                override fun onCancelled(databaseError: DatabaseError) {
+                }
+            })
+
+
+
+
+
             for (i in 0 until res3.item.size){
                 promoNoti.add(res3.item[i])
             }
@@ -173,7 +194,9 @@ class MainActivity : ComponentActivity() {
             editor.putString(KEY_VARIABLE, uid)
             editor.apply()
             primaryTheme {
-
+                if(status==ConnectivityObserver.Status.Available  && value=="" || versionName==""){
+                    mainLoading()
+                }
                 if (status==ConnectivityObserver.Status.Available  && value=="false"){
                     if (filteredList.isEmpty()){
                         mainLoading()
@@ -232,9 +255,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                if(status==ConnectivityObserver.Status.Available  && value==""){
-                    mainLoading()
-                }
+
+
                 if (status!=ConnectivityObserver.Status.Available){
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                         internet()
@@ -243,8 +265,23 @@ class MainActivity : ComponentActivity() {
                 if (value=="true"){
                     maintenance()
                 }
+                if (versionName> getCurrentAppVersion(this)){
+                    appUpdater()
+                }
             }
         }
+    }
+    fun getCurrentAppVersion(context: Context): String {
+        try {
+            val packageManager: PackageManager = context.packageManager
+            val packageName: String = context.packageName
+
+            val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
+            return packageInfo.versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e("VersionInfo", "Package name not found", e)
+        }
+        return "N/A"
     }
     override fun onBackPressed() {
         if (backPressedCount == 1L) {

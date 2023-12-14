@@ -218,7 +218,7 @@ fun about2(
                     Column(
                         Modifier
                             .fillMaxWidth()
-                            .fillMaxHeight(0.4f)
+                            .fillMaxHeight(0.5f)
                             .padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally){
                             Text(text = "Begin your journey \uD83C\uDFA2", color = Color.Black, fontWeight = FontWeight.ExtraBold, fontSize = 25.sp)
