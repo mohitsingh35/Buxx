@@ -10,26 +10,14 @@
 
 <h2>Project Screenshots:</h2>
 
-<img src="https://github.com/mohitsingh35/TradeZY/blob/86ab7a1f8d4cf79e6c3c4233e30e2f327d62daa6/Images/Screenshot_2023-12-28-22-54-20-16_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="600/">
+![Screenshot 1](https://github.com/mohitsingh35/TradeZY/blob/86ab7a1f8d4cf79e6c3c4233e30e2f327d62daa6/Images/Screenshot_2023-12-28-22-54-20-16_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true) | ![Screenshot 2](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-04-44_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true) | ![Screenshot 3](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-06-54_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true) | ![Screenshot 4](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-08-85_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true) | ![Screenshot 5](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-11-27_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true)
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+Splash Screen | Onboarding Screen - 1  | Onboarding Screen - 2 | Onboarding Screen - 3 | Google Authentication
 
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-04-44_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
+![Screenshot 6](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-25-55_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true) | ![Screenshot 7](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-57-18-09_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true) | ![Screenshot 8](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-57-28-45_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true) | ![Screenshot 9](https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-58-04-31_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true)
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+HomeScreen| Chat System | Search Screen | Create an Ad
 
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-06-54_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
-
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-08-85_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
-
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-11-27_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
-
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-56-25-55_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
-
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-57-18-09_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
-
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-57-28-45_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
-
-<img src="https://github.com/mohitsingh35/TradeZY/blob/master/Images/Screenshot_2023-12-28-22-58-04-31_ff02542f36fe9842ca82ede1fb7b9e23.jpg?raw=true" alt="project-screenshot" width="200" height="400/">
-
-
-  
   
 <h2>🧐 Features</h2>
 
