@@ -140,7 +140,7 @@ Here're some of the project's best features:
 <p>1. Clone the repository</p>
 
 ```
-git clone https://github.com/mohitsingh35/TradeZY.git
+git clone https://github.com/mohitsingh35/Buxx.git
 ```
 
 <p>2. Open the project in Android Studio.</p>
