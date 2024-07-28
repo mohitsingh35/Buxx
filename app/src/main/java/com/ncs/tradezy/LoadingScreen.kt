@@ -251,14 +251,13 @@ fun maintenance() {
 
 
 @Composable
-fun appUpdater() {
+fun appUpdater(versionName: String) {
+    var downloadStatus = remember { mutableStateOf(DownloadStatus.NotStarted) }
 
-    var downloadStatus = remember {
-        mutableStateOf(DownloadStatus.NotStarted)
-    }
     fun downloadAPK(
+        context: Context,
         url: String,
-        onProgress: (Int) -> Unit,
+        onProgress: (Int) -> Unit
     ): Job {
         return CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -268,9 +267,8 @@ fun appUpdater() {
                 val lengthOfFile = connection.contentLength
                 val inputStream: InputStream = connection.inputStream
 
-                val externalDir = File("/storage/emulated/0/Android/data/com.ncs.tradezy/files/")
-                val outputFile = File(externalDir, "app.apk")
-
+                val externalDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+                val outputFile = File(externalDir, "Buxx_${versionName}.apk")
 
                 val outputStream: OutputStream = outputFile.outputStream()
 
@@ -301,19 +299,15 @@ fun appUpdater() {
         }
     }
 
-
     var appConfigList by remember { mutableStateOf(emptyList<AppConfigUpdater>()) }
     var progress by remember { mutableStateOf(0) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
     var isDownloading by remember { mutableStateOf(false) }
-
     var apkFile by remember { mutableStateOf<File?>(null) }
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
         if (!context.packageManager.canRequestPackageInstalls()) {
             context.startActivity(
                 Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
@@ -347,11 +341,13 @@ fun appUpdater() {
             1
         )
     }
+
     LaunchedEffect(true) {
         fetchDataFromFirebase { updatedList ->
             appConfigList = updatedList
         }
     }
+
     Column(
         Modifier
             .background(background)
@@ -360,15 +356,14 @@ fun appUpdater() {
     ) {
         Spacer(modifier = Modifier.height(45.dp))
         Text(text = "Hooray A new version \nof the App is available", color = Color.DarkGray, fontSize = 18.sp)
-        if (appConfigList.isEmpty()){
+        if (appConfigList.isEmpty()) {
             Spacer(modifier = Modifier.height(35.dp))
             Text(text = "Looking for the latest version...", color = Color.LightGray, fontSize = 15.sp)
-        }
-        else{
+        } else {
             Spacer(modifier = Modifier.height(35.dp))
-            Text(text = "Version ${appConfigList.get(0).version}", color = Color.Gray, fontSize = 18.sp)
+            Text(text = "Version ${appConfigList[0].version}", color = Color.Gray, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(20.dp))
-            Text(text = "${appConfigList.get(0).logs}", color = Color.Gray, fontSize = 18.sp)
+            Text(text = "${appConfigList[0].logs}", color = Color.Gray, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(45.dp))
             var progress by remember { mutableStateOf(0) }
             var downloadJob: Job? by remember { mutableStateOf(null) }
@@ -377,7 +372,8 @@ fun appUpdater() {
                 onClick = {
                     downloadStatus.value = DownloadStatus.InProgress
                     downloadJob = downloadAPK(
-                        appConfigList.get(0).url!!,
+                        context,
+                        appConfigList[0].url!!,
                         onProgress = { progress = it },
                     )
                 },
@@ -388,12 +384,7 @@ fun appUpdater() {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = "Download APK")
                 }
-
-
             }
-
-
-
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -408,10 +399,10 @@ fun appUpdater() {
                     Spacer(modifier = Modifier.height(16.dp))
                     val context = LocalContext.current
                     val uriHandler = LocalUriHandler.current
-                    val file = File(context.getExternalFilesDir(null), "app.apk")
+                    val file = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Buxx_${versionName}.apk")
                     Button(
                         onClick = {
-                            Log.d("file",file.absolutePath.toString())
+                            Log.d("file", file.absolutePath.toString())
 
                             initiateInstall(file, context)
                         }
@@ -422,52 +413,11 @@ fun appUpdater() {
                             Text(text = "Install")
                         }
                     }
-
                 }
-
                 else -> {}
             }
-
-//            Box(Modifier
-//                .fillMaxWidth()
-//                .height(50.dp)
-//                .padding(
-//                    start = 10.dp, end = 10.dp
-//                )
-//                .clip(RoundedCornerShape(5.dp))
-//                .clickable {
-//
-//                }
-//                .background(main), contentAlignment = Alignment.Center) {
-//
-//            }
-//            Row {
-//                Text(
-//                    text = "Download Version ${appConfigList[0].version}",
-//                    color = Color.Black,
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = 20.sp
-//                )
-//                Spacer(modifier = Modifier.width(10.dp))
-//                Image(
-//                    imageVector = Icons.Filled.KeyboardArrowDown,
-//                    contentDescription = "",
-//                    modifier = Modifier.size(25.dp)
-//                )
-//
-//            }
-//            Spacer(modifier = Modifier.height(15.dp))
-//            if (!appConfigList[0].forceUpdate){
-//                Text(text = "Skip", color = Color.Gray, fontSize = 16.sp)
-//            }
-
         }
-
-
     }
-
-
-
 }
 
 enum class DownloadStatus {
@@ -476,7 +426,6 @@ enum class DownloadStatus {
     Completed,
     Failed
 }
-
 
 private fun initiateInstall(file: File, context: Context) {
     try {
@@ -495,10 +444,6 @@ private fun initiateInstall(file: File, context: Context) {
     }
 }
 
-
-
-
-
 @Composable
 fun installApk(context: Context, apkFile: File) {
     val uri = androidx.core.content.FileProvider.getUriForFile(
@@ -515,6 +460,7 @@ fun installApk(context: Context, apkFile: File) {
         e.printStackTrace()
     }
 }
+
 
 
 private fun fetchDataFromFirebase(onDataFetched: (List<AppConfigUpdater>) -> Unit) {

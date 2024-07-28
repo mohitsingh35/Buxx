@@ -266,7 +266,7 @@ class MainActivity : ComponentActivity() {
                     maintenance()
                 }
                 if (versionName> getCurrentAppVersion(this)){
-                    appUpdater()
+                    appUpdater(versionName)
                 }
             }
         }
